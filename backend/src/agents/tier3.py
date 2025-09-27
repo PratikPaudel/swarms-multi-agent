@@ -303,8 +303,20 @@ class PortfolioAgent(Agent):
         self.max_position_size = 0.3  # 30% max per asset
         self.risk_budget = 0.02  # 2% daily VaR limit
 
-    def optimize_portfolio(self, strategy_decisions: Dict[str, Any], current_portfolio: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Optimize portfolio allocation based on strategy decisions"""
+    async def optimize_portfolio(self, strategy_decisions: Dict[str, Any], current_portfolio: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Optimize portfolio allocation based on strategy decisions using real portfolio data"""
+        from ..services.real_data_sources import real_data_sources
+
+        try:
+            # Get real portfolio data if not provided
+            if current_portfolio is None:
+                portfolio_data = await real_data_sources.get_real_portfolio_data()
+                current_portfolio = portfolio_data.get("portfolio", {})
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error fetching real portfolio data: {e}")
 
         if current_portfolio is None:
             current_portfolio = {
@@ -525,8 +537,20 @@ class ExecutorAgent(Agent):
         self.execution_algorithms = ["TWAP", "VWAP", "Market", "Limit"]
         self.slippage_tolerance = 0.001  # 0.1%
 
-    def execute_rebalancing(self, rebalancing_actions: List[Dict[str, Any]], market_conditions: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Execute portfolio rebalancing actions"""
+    async def execute_rebalancing(self, rebalancing_actions: List[Dict[str, Any]], market_conditions: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Execute portfolio rebalancing actions using real market microstructure data"""
+        from ..services.real_data_sources import real_data_sources
+
+        try:
+            # Get real execution data if not provided
+            if market_conditions is None:
+                execution_data = await real_data_sources.get_real_execution_data()
+                market_conditions = execution_data.get("market_conditions", {})
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error fetching real execution data: {e}")
 
         if market_conditions is None:
             market_conditions = {

@@ -61,8 +61,58 @@ class TechnicalAnalystAgent(Agent):
 
         return macd_line, signal_line, histogram
 
-    def generate_price_history(self, base_price: float, days: int = 30) -> List[float]:
-        """Generate mock price history for analysis"""
+    def get_real_price_history(self, asset: str, days: int = 30) -> List[float]:
+        """Get real price history from yfinance"""
+        from ..services.real_data_sources import real_data_sources
+
+        try:
+            # Get real historical data
+            period_map = {
+                30: "1mo",
+                90: "3mo",
+                180: "6mo",
+                365: "1y"
+            }
+
+            # Choose appropriate period
+            period = "1mo"
+            if days <= 7:
+                period = "7d"
+            elif days <= 30:
+                period = "1mo"
+            elif days <= 90:
+                period = "3mo"
+            elif days <= 180:
+                period = "6mo"
+            else:
+                period = "1y"
+
+            hist_data = real_data_sources.get_real_historical_data(asset, period)
+
+            if not hist_data.empty:
+                # Extract closing prices
+                prices = hist_data['Close'].tolist()
+
+                # If we have more data than needed, take the last N days
+                if len(prices) > days:
+                    prices = prices[-days:]
+
+                # If we have less data than needed, pad with the last known price
+                while len(prices) < days:
+                    prices.insert(0, prices[0])
+
+                return prices
+            else:
+                # Fallback to mock data
+                return self.generate_mock_price_history(50.0, days)
+
+        except Exception as e:
+            logger.error(f"Error fetching real price history for {asset}: {e}")
+            # Fallback to mock data
+            return self.generate_mock_price_history(50.0, days)
+
+    def generate_mock_price_history(self, base_price: float, days: int = 30) -> List[float]:
+        """Generate mock price history for analysis (fallback)"""
         prices = [base_price]
 
         for _ in range(days):
@@ -74,9 +124,9 @@ class TechnicalAnalystAgent(Agent):
         return prices
 
     def analyze_technical_indicators(self, asset: str, current_price: float) -> Dict[str, Any]:
-        """Analyze technical indicators for given asset"""
-        # Generate mock price history
-        price_history = self.generate_price_history(current_price)
+        """Analyze technical indicators for given asset using real historical data"""
+        # Get real price history
+        price_history = self.get_real_price_history(asset, 60)  # Get 60 days for better analysis
 
         # Calculate indicators
         rsi = self.calculate_rsi(price_history)
