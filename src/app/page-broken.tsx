@@ -25,10 +25,12 @@ interface TradingDecisionResponse {
 
 export default function TradingFloor() {
   const [activeTab, setActiveTab] = useState("coin-analytics");
+  // Real WebSocket connection status
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
   const triggerMarketAnalysis = (data?: any) => console.log("Using REST API instead of WebSocket", data);
   const reconnect = () => {
     setConnectionStatus("Connecting...");
+    // Try to reconnect by fetching agent data
     fetchAgentData().then(() => {
       setConnectionStatus("Connected");
     }).catch(() => {
@@ -36,6 +38,7 @@ export default function TradingFloor() {
     });
   };
 
+  // Check connection status
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -51,11 +54,12 @@ export default function TradingFloor() {
     };
 
     checkConnection();
-    const interval = setInterval(checkConnection, 15000);
+    const interval = setInterval(checkConnection, 15000); // Check every 15 seconds
     return () => clearInterval(interval);
   }, []);
 
   const [agents, setAgents] = useState([
+    // Initial fallback data - will be replaced with real backend data
     { id: "market_data", name: "Market Data Collector", tier: 1, status: "active", confidence: 0, lastAction: "Connecting to backend...", icon: Activity },
     { id: "sentiment", name: "Sentiment Analyzer", tier: 1, status: "active", confidence: 0, lastAction: "Connecting to backend...", icon: Brain },
     { id: "onchain", name: "On-Chain Monitor", tier: 1, status: "active", confidence: 0, lastAction: "Connecting to backend...", icon: Target },
@@ -67,12 +71,17 @@ export default function TradingFloor() {
     { id: "executor", name: "Trade Executor", tier: 3, status: "standby", confidence: 0, lastAction: "Connecting to backend...", icon: Activity },
   ]);
 
+  // Fetch real agent data from backend
   const fetchAgentData = async () => {
     try {
+      console.log('Fetching agent data from backend...');
       const response = await fetch('http://localhost:8000/agents/status');
+      console.log('Response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Received data:', data);
         if (data.agents) {
+          // Create new agent array with updated data
           setAgents(currentAgents => {
             return currentAgents.map(frontendAgent => {
               const backendAgent = data.agents.find((a: any) => a.id === frontendAgent.id);
@@ -96,17 +105,21 @@ export default function TradingFloor() {
     }
   };
 
+  // Fetch real trading decisions from backend
   const fetchTradingDecisions = async () => {
     try {
+      console.log('Fetching trading decisions from backend...');
       const response = await fetch('http://localhost:8000/trading/decisions');
       if (response.ok) {
         const data = await response.json();
+        console.log('Received trading decisions:', data);
         if (data.decisions && data.decisions.length > 0) {
-          setTradingDecisions(data.decisions.slice(0, 5));
+          setTradingDecisions(data.decisions.slice(0, 5)); // Keep last 5 decisions
         }
       }
     } catch (error) {
       console.error('Failed to fetch trading decisions:', error);
+      // Keep existing fallback data if fetch fails
     }
   };
 
@@ -117,27 +130,33 @@ export default function TradingFloor() {
   const [votingResults, setVotingResults] = useState<any>(null);
   const [isVoting, setIsVoting] = useState(false);
 
+  // Note: WebSocket temporarily disabled - using REST API for decisions
+
+  // Enable periodic market data trigger for real analysis
   useEffect(() => {
     const interval = setInterval(() => {
       const marketData = {
-        test: "trigger_real_data",
+        test: "trigger_real_data", // This will trigger the backend to fetch real CoinGecko data
         timestamp: new Date().toISOString()
       };
 
       if (connectionStatus === 'Connected') {
         triggerMarketAnalysis(marketData);
       }
-    }, 45000);
+    }, 45000); // Every 45 seconds
 
     return () => clearInterval(interval);
   }, [connectionStatus, triggerMarketAnalysis]);
 
+  // Fetch real data on mount and periodically
   useEffect(() => {
+    // Initial fetch immediately
     fetchAgentData();
     fetchTradingDecisions();
 
-    const agentInterval = setInterval(fetchAgentData, 5000);
-    const decisionsInterval = setInterval(fetchTradingDecisions, 10000);
+    // Set up periodic fetching of real data
+    const agentInterval = setInterval(fetchAgentData, 5000); // Every 5 seconds
+    const decisionsInterval = setInterval(fetchTradingDecisions, 10000); // Every 10 seconds
 
     return () => {
       clearInterval(agentInterval);
@@ -147,6 +166,7 @@ export default function TradingFloor() {
 
   const handleTriggerAnalysis = async () => {
     try {
+      // Fetch real current market prices
       const response = await fetch('http://localhost:8000/market/current');
       let currentMarketData;
 
@@ -154,11 +174,13 @@ export default function TradingFloor() {
         const data = await response.json();
         currentMarketData = {
           ...data.prices,
-          BNB: data.prices.BNB,
+          BNB: data.prices.BNB, // Include BNB in the analysis
           trigger: "manual",
           timestamp: new Date().toISOString()
         };
+        console.log('Using real market prices for analysis:', currentMarketData);
       } else {
+        // Fallback to basic prices if API fails
         currentMarketData = {
           BTC: 43000,
           ETH: 2900,
@@ -167,11 +189,13 @@ export default function TradingFloor() {
           trigger: "manual_fallback",
           timestamp: new Date().toISOString()
         };
+        console.log('Using fallback prices for analysis:', currentMarketData);
       }
 
       triggerMarketAnalysis(currentMarketData);
     } catch (error) {
       console.error('Error fetching current prices for analysis:', error);
+      // Use fallback data if fetch fails
       const fallbackData = {
         BTC: 43000,
         ETH: 2900,
@@ -187,6 +211,9 @@ export default function TradingFloor() {
   const handleTriggerVoting = async () => {
     setIsVoting(true);
     try {
+      console.log('Triggering democratic voting...');
+
+      // Fetch real current market prices for voting
       let marketData;
       try {
         const priceResponse = await fetch('http://localhost:8000/market/current');
@@ -198,10 +225,12 @@ export default function TradingFloor() {
             timestamp: new Date().toISOString(),
             trigger: 'manual_voting_with_real_prices'
           };
+          console.log('Using real market prices for voting:', marketData);
         } else {
           throw new Error('Price fetch failed');
         }
       } catch (priceError) {
+        console.log('Failed to fetch real prices, using fallback for voting');
         marketData = {
           BTC: 43000,
           ETH: 2900,
@@ -226,6 +255,9 @@ export default function TradingFloor() {
 
       if (response.ok) {
         const data: TradingDecisionResponse = await response.json();
+        console.log('Voting results:', data);
+
+        // Extract voting results from the response
         const votingData = {
           consensus_action: data.consensus_action,
           overall_confidence: data.overall_confidence,
@@ -235,6 +267,7 @@ export default function TradingFloor() {
 
         setVotingResults(votingData);
 
+        // Update trading decisions with new result
         if (votingData.consensus_action) {
           const newDecision = {
             timestamp: new Date().toLocaleString(),
@@ -259,63 +292,66 @@ export default function TradingFloor() {
     <div className="flex min-h-screen bg-background">
       <SimpleSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
         <div className="border-b bg-background p-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Autonomous Trading Floor</h1>
               <p className="text-muted-foreground text-sm">AI-powered multi-agent trading system</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge
-                variant={connectionStatus === "Connected" ? "default" : "destructive"}
-                className="flex items-center gap-1"
-              >
-                <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`} />
-                {connectionStatus}
-              </Badge>
-              {connectionStatus !== "Connected" && (
-                <Button size="sm" variant="outline" onClick={reconnect}>
-                  <RefreshCw className="w-4 h-4 mr-1" />
-                  Reconnect
-                </Button>
-              )}
-              <Button size="sm" onClick={handleTriggerAnalysis} disabled={connectionStatus !== "Connected"}>
-                <Zap className="w-4 h-4 mr-1" />
-                Trigger Analysis
-              </Button>
-              <Button size="sm" onClick={handleTriggerVoting} disabled={isVoting || connectionStatus !== "Connected"} variant="outline">
-                {isVoting ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1" />
-                    Voting...
-                  </>
-                ) : (
-                  <>
-                    <Vote className="w-4 h-4 mr-1" />
-                    Start Democracy
-                  </>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={connectionStatus === "Connected" ? "default" : "destructive"}
+                  className="flex items-center gap-1"
+                >
+                  <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`} />
+                  {connectionStatus}
+                </Badge>
+                {connectionStatus !== "Connected" && (
+                  <Button size="sm" variant="outline" onClick={reconnect}>
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Reconnect
+                  </Button>
                 )}
-              </Button>
+                <Button size="sm" onClick={handleTriggerAnalysis} disabled={connectionStatus !== "Connected"}>
+                  <Zap className="w-4 h-4 mr-1" />
+                  Trigger Analysis
+                </Button>
+                <Button size="sm" onClick={handleTriggerVoting} disabled={isVoting || connectionStatus !== "Connected"} variant="outline">
+                  {isVoting ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1" />
+                      Voting...
+                    </>
+                  ) : (
+                    <>
+                      <Vote className="w-4 h-4 mr-1" />
+                      Start Democracy
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex-1 p-6">
-          {activeTab === "coin-analytics" && (
-            <CoinAnalytics
-              agents={agents}
-              votingResults={votingResults}
-              onTriggerVoting={handleTriggerVoting}
-              isVoting={isVoting}
-            />
-          )}
-          {activeTab === "decision-hub" && (
-            <DecisionHub
-              agents={agents}
-              decisions={tradingDecisions}
-              votingResults={votingResults}
-            />
-          )}
+          {/* Main Content */}
+          <div className="flex-1 p-6">
+            {activeTab === "coin-analytics" && (
+              <CoinAnalytics
+                agents={agents}
+                votingResults={votingResults}
+                onTriggerVoting={handleTriggerVoting}
+                isVoting={isVoting}
+              />
+            )}
+            {activeTab === "decision-hub" && (
+              <DecisionHub
+                agents={agents}
+                decisions={tradingDecisions}
+                votingResults={votingResults}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

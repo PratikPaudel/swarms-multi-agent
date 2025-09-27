@@ -11,6 +11,7 @@ const getInitialData = () => {
     BTC: 0,
     ETH: 0,
     SOL: 0,
+    BNB: 0,
   }];
 };
 
@@ -51,13 +52,15 @@ export function TradingChart() {
         const results = await Promise.all([
           fetchHistoricalData('BTC'),
           fetchHistoricalData('ETH'),
-          fetchHistoricalData('SOL')
+          fetchHistoricalData('SOL'),
+          fetchHistoricalData('BNB')
         ]);
 
         // Merge all data into combined chart data
         const btcData = results.find(r => r?.symbol === 'BTC')?.data || [];
         const ethData = results.find(r => r?.symbol === 'ETH')?.data || [];
         const solData = results.find(r => r?.symbol === 'SOL')?.data || [];
+        const bnbData = results.find(r => r?.symbol === 'BNB')?.data || [];
 
         if (btcData.length > 0) {
           const combinedData = btcData.map((btcPoint: any, index: number) => ({
@@ -65,6 +68,7 @@ export function TradingChart() {
             BTC: btcPoint.BTC || 0,
             ETH: ethData[index]?.ETH || 0,
             SOL: solData[index]?.SOL || 0,
+            BNB: bnbData[index]?.BNB || 0,
           }));
           setData(combinedData);
         }
@@ -115,7 +119,7 @@ export function TradingChart() {
         <div className="flex items-center justify-between">
           <CardTitle>Real-time Trading Chart {loading && "(Loading...)"}</CardTitle>
           <div className="flex gap-2">
-            {["BTC", "ETH", "SOL"].map((asset) => (
+            {["BTC", "ETH", "SOL", "BNB"].map((asset) => (
               <button
                 key={asset}
                 onClick={() => setSelectedAsset(asset)}
@@ -171,10 +175,10 @@ export function TradingChart() {
               <Line
                 type="monotone"
                 dataKey={selectedAsset}
-                stroke={selectedAsset === "BTC" ? "#F59E0B" : selectedAsset === "ETH" ? "#3B82F6" : "#8B5CF6"}
+                stroke={selectedAsset === "BTC" ? "#F59E0B" : selectedAsset === "ETH" ? "#3B82F6" : selectedAsset === "SOL" ? "#8B5CF6" : "#10B981"}
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, fill: "#F59E0B" }}
+                activeDot={{ r: 4, fill: selectedAsset === "BTC" ? "#F59E0B" : selectedAsset === "ETH" ? "#3B82F6" : selectedAsset === "SOL" ? "#8B5CF6" : "#10B981" }}
               />
             </LineChart>
           </ResponsiveContainer>
