@@ -57,6 +57,16 @@ class MarketDataAgent(Agent):
                         "timestamp": datetime.utcnow().isoformat()
                     }
 
+            # Enhance with macro economic context
+            try:
+                from services.real_data_sources import real_data_sources
+                macro_data = await real_data_sources.get_real_macro_data()
+                market_data["macro_context"] = macro_data.get("indicators", {})
+                market_data["data_source"] = "CoinGecko + FRED APIs"
+            except Exception as macro_error:
+                logger.error(f"Error fetching macro data: {macro_error}")
+                market_data["data_source"] = "CoinGecko API only"
+
             return market_data
 
         except Exception as e:
@@ -111,30 +121,67 @@ class SentimentAgent(Agent):
         self.news_sources = ["coindesk", "cointelegraph", "decrypt"]
 
     async def fetch_sentiment_data(self) -> Dict[str, Any]:
-        """Fetch sentiment data from social sources"""
-        # Mock sentiment data
-        assets = ["BTC", "ETH", "SOL"]
-        sentiment_data = {}
+        """Fetch real sentiment data from Tavily and Exa APIs"""
+        from services.real_data_sources import real_data_sources
 
-        for asset in assets:
-            # Generate realistic sentiment scores
-            base_sentiment = random.randint(-20, 80)  # Generally more positive
-            news_impact = random.randint(-30, 30)
-            social_impact = random.randint(-25, 25)
+        try:
+            # Get real sentiment data from APIs
+            assets = ["BTC", "ETH", "SOL", "ADA", "DOT"]
+            real_sentiment = await real_data_sources.get_real_sentiment_data(assets)
 
-            total_sentiment = max(-100, min(100, base_sentiment + news_impact + social_impact))
+            # Convert to expected format for tier1 agents
+            sentiment_data = {}
+            for asset in assets:
+                asset_data = real_sentiment.get(asset, {})
 
-            sentiment_data[asset] = {
-                "overall_sentiment": total_sentiment,
-                "news_sentiment": news_impact,
-                "social_sentiment": social_impact,
-                "mention_count": random.randint(100, 5000),
-                "trending_topics": [f"{asset}_news", f"{asset}_price", f"{asset}_adoption"],
-                "influencer_mentions": random.randint(0, 50),
-                "sentiment_change_24h": random.randint(-20, 20)
-            }
+                # Convert sentiment score from 0-1 to -100 to +100
+                overall_sentiment_raw = asset_data.get("overall_sentiment", 0.5)
+                overall_sentiment = int((overall_sentiment_raw - 0.5) * 200)
 
-        return sentiment_data
+                news_sentiment_raw = asset_data.get("news_sentiment", 0.5)
+                news_sentiment = int((news_sentiment_raw - 0.5) * 200)
+
+                social_sentiment_raw = asset_data.get("social_sentiment", 0.5)
+                social_sentiment = int((social_sentiment_raw - 0.5) * 200)
+
+                sentiment_data[asset] = {
+                    "overall_sentiment": overall_sentiment,
+                    "news_sentiment": news_sentiment,
+                    "social_sentiment": social_sentiment,
+                    "mention_count": asset_data.get("mention_count", 0),
+                    "trending_topics": asset_data.get("trending_topics", [f"{asset}_news", f"{asset}_price"]),
+                    "influencer_mentions": random.randint(0, 50),  # Would need specialized API for this
+                    "sentiment_change_24h": random.randint(-20, 20),  # Would need historical comparison
+                    "confidence": asset_data.get("confidence", 0.5),
+                    "data_source": "Tavily + Exa APIs"
+                }
+
+            return sentiment_data
+
+        except Exception as e:
+            logger.error(f"Error fetching real sentiment data: {e}")
+            # Fallback to mock data
+            assets = ["BTC", "ETH", "SOL"]
+            sentiment_data = {}
+
+            for asset in assets:
+                base_sentiment = random.randint(-20, 80)
+                news_impact = random.randint(-30, 30)
+                social_impact = random.randint(-25, 25)
+                total_sentiment = max(-100, min(100, base_sentiment + news_impact + social_impact))
+
+                sentiment_data[asset] = {
+                    "overall_sentiment": total_sentiment,
+                    "news_sentiment": news_impact,
+                    "social_sentiment": social_impact,
+                    "mention_count": random.randint(100, 5000),
+                    "trending_topics": [f"{asset}_news", f"{asset}_price", f"{asset}_adoption"],
+                    "influencer_mentions": random.randint(0, 50),
+                    "sentiment_change_24h": random.randint(-20, 20),
+                    "data_source": "Fallback mock data"
+                }
+
+            return sentiment_data
 
     def analyze_sentiment_trends(self, data: Dict[str, Any]) -> str:
         """Analyze sentiment trends and provide insights"""
@@ -173,7 +220,7 @@ class OnChainAgent(Agent):
 
     async def fetch_onchain_data(self) -> Dict[str, Any]:
         """Fetch real on-chain data and DeFi metrics"""
-        from ..services.real_data_sources import real_data_sources
+        from services.real_data_sources import real_data_sources
 
         try:
             # Get real DeFi data from DefiLlama

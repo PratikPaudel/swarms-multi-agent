@@ -63,7 +63,7 @@ class TechnicalAnalystAgent(Agent):
 
     def get_real_price_history(self, asset: str, days: int = 30) -> List[float]:
         """Get real price history from yfinance"""
-        from ..services.real_data_sources import real_data_sources
+        from services.real_data_sources import real_data_sources
 
         try:
             # Get real historical data
@@ -257,8 +257,39 @@ class RiskCalculatorAgent(Agent):
         kelly_percent = (b * p - q) / b
         return max(0, min(kelly_percent, 0.25))  # Cap at 25% for safety
 
-    def generate_return_series(self, volatility: float = 0.15, days: int = 252) -> List[float]:
-        """Generate mock return series for risk calculations"""
+    def get_real_return_series(self, asset: str, days: int = 252) -> List[float]:
+        """Get real historical returns for risk calculations"""
+        from services.real_data_sources import real_data_sources
+
+        try:
+            # Get historical price data
+            period = "1y" if days <= 365 else "2y"
+            hist_data = real_data_sources.get_real_historical_data(asset, period)
+
+            if not hist_data.empty and len(hist_data) > 1:
+                # Calculate daily returns
+                prices = hist_data['Close'].tolist()
+                returns = []
+                for i in range(1, len(prices)):
+                    daily_return = (prices[i] - prices[i-1]) / prices[i-1]
+                    returns.append(daily_return)
+
+                # Take the most recent 'days' returns
+                if len(returns) > days:
+                    returns = returns[-days:]
+
+                return returns
+            else:
+                # Fallback to generated returns
+                return self.generate_mock_return_series(0.15, days)
+
+        except Exception as e:
+            logger.error(f"Error getting real returns for {asset}: {e}")
+            # Fallback to generated returns
+            return self.generate_mock_return_series(0.15, days)
+
+    def generate_mock_return_series(self, volatility: float = 0.15, days: int = 252) -> List[float]:
+        """Generate mock return series for risk calculations (fallback)"""
         returns = []
         for _ in range(days):
             # Generate normally distributed returns
@@ -281,7 +312,7 @@ class RiskCalculatorAgent(Agent):
             volatility = position.get("volatility", 0.15)  # Default 15% volatility
 
             # Generate returns for this asset
-            asset_returns = self.generate_return_series(volatility)
+            asset_returns = self.get_real_return_series(asset)
 
             # Weight the returns by position size
             weighted_returns = [r * weight for r in asset_returns]
@@ -378,26 +409,35 @@ class CorrelationAgent(Agent):
     def analyze_correlations(self, market_data: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze correlations between different assets"""
 
-        # Generate mock return series for each asset
+        # Get real historical returns for correlation analysis
         asset_returns = {}
-        base_returns = [random.gauss(0, 0.02) for _ in range(50)]  # 50 days of returns
-
         correlations = {}
 
-        # Generate returns for each asset with realistic correlations
-        for asset in market_data.keys():
-            if asset == "BTC":
-                asset_returns[asset] = base_returns
-            elif asset == "ETH":
-                # ETH typically highly correlated with BTC
-                asset_returns[asset] = self.generate_correlated_returns(base_returns, 0.8)
-            elif asset == "SOL":
-                # SOL moderately correlated
-                asset_returns[asset] = self.generate_correlated_returns(base_returns, 0.6)
-            else:
-                # Other assets with varying correlations
-                correlation = random.uniform(0.3, 0.7)
-                asset_returns[asset] = self.generate_correlated_returns(base_returns, correlation)
+        try:
+            # Use the same method as RiskCalculatorAgent to get real returns
+            risk_calc = RiskCalculatorAgent()
+
+            # Get real return series for each asset
+            for asset in market_data.keys():
+                if asset not in ["macro_context", "data_source", "timestamp"]:  # Skip metadata
+                    real_returns = risk_calc.get_real_return_series(asset, 60)  # 60 days
+                    if real_returns and len(real_returns) > 10:  # Need sufficient data
+                        asset_returns[asset] = real_returns
+                    else:
+                        # Fallback to mock data for this asset
+                        asset_returns[asset] = [random.gauss(0, 0.02) for _ in range(50)]
+
+        except Exception as e:
+            logger.error(f"Error getting real returns for correlation analysis: {e}")
+            # Fallback to mock data for all assets
+            base_returns = [random.gauss(0, 0.02) for _ in range(50)]
+            for asset in market_data.keys():
+                if asset not in ["macro_context", "data_source", "timestamp"]:
+                    if asset == "BTC":
+                        asset_returns[asset] = base_returns
+                    else:
+                        correlation = random.uniform(0.3, 0.8)
+                        asset_returns[asset] = self.generate_correlated_returns(base_returns, correlation)
 
         # Calculate pairwise correlations
         assets = list(asset_returns.keys())

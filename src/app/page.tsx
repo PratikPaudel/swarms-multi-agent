@@ -27,10 +27,38 @@ interface TradingDecisionResponse {
 }
 
 export default function TradingFloor() {
-  // Temporarily disable WebSocket to avoid connection loops - using REST API instead
-  const connectionStatus = "Connected"; // Mock connected status
+  // Real WebSocket connection status
+  const [connectionStatus, setConnectionStatus] = useState("Connecting...");
   const triggerMarketAnalysis = (data?: any) => console.log("Using REST API instead of WebSocket", data);
-  const reconnect = () => console.log("Using REST API instead of WebSocket");
+  const reconnect = () => {
+    setConnectionStatus("Connecting...");
+    // Try to reconnect by fetching agent data
+    fetchAgentData().then(() => {
+      setConnectionStatus("Connected");
+    }).catch(() => {
+      setConnectionStatus("Disconnected");
+    });
+  };
+
+  // Check connection status
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/health');
+        if (response.ok) {
+          setConnectionStatus("Connected");
+        } else {
+          setConnectionStatus("Disconnected");
+        }
+      } catch (error) {
+        setConnectionStatus("Disconnected");
+      }
+    };
+
+    checkConnection();
+    const interval = setInterval(checkConnection, 15000); // Check every 15 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const [agents, setAgents] = useState([
     // Initial fallback data - will be replaced with real backend data
@@ -79,10 +107,26 @@ export default function TradingFloor() {
     }
   };
 
+  // Fetch real trading decisions from backend
+  const fetchTradingDecisions = async () => {
+    try {
+      console.log('Fetching trading decisions from backend...');
+      const response = await fetch('http://localhost:8000/trading/decisions');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Received trading decisions:', data);
+        if (data.decisions && data.decisions.length > 0) {
+          setTradingDecisions(data.decisions.slice(0, 5)); // Keep last 5 decisions
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch trading decisions:', error);
+      // Keep existing fallback data if fetch fails
+    }
+  };
+
   const [tradingDecisions, setTradingDecisions] = useState([
-    { timestamp: "2024-01-20 14:23:15", asset: "BTC", action: "BUY", confidence: 85, reasoning: "Technical breakout confirmed by 7/9 agents" },
-    { timestamp: "2024-01-20 14:18:32", asset: "ETH", action: "HOLD", confidence: 72, reasoning: "Mixed signals, risk manager recommends patience" },
-    { timestamp: "2024-01-20 14:15:07", asset: "SOL", action: "SELL", confidence: 91, reasoning: "Whale movement detected, sentiment turning negative" },
+    { timestamp: "Connecting...", asset: "...", action: "...", confidence: 0, reasoning: "Loading recent trading decisions from backend..." },
   ]);
 
   const [votingResults, setVotingResults] = useState<any>(null);
@@ -106,43 +150,107 @@ export default function TradingFloor() {
     return () => clearInterval(interval);
   }, [connectionStatus, triggerMarketAnalysis]);
 
-  // Fetch real agent data on mount and periodically
+  // Fetch real data on mount and periodically
   useEffect(() => {
     // Initial fetch immediately
     fetchAgentData();
+    fetchTradingDecisions();
 
-    // Set up periodic fetching of real agent data
-    const interval = setInterval(fetchAgentData, 5000); // Every 5 seconds
+    // Set up periodic fetching of real data
+    const agentInterval = setInterval(fetchAgentData, 5000); // Every 5 seconds
+    const decisionsInterval = setInterval(fetchTradingDecisions, 10000); // Every 10 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(agentInterval);
+      clearInterval(decisionsInterval);
+    };
   }, []);
 
-  const handleTriggerAnalysis = () => {
-    const currentMarketData = {
-      BTC: 42150,
-      ETH: 2850,
-      SOL: 98,
-      trigger: "manual",
-      timestamp: new Date().toISOString()
-    };
-    triggerMarketAnalysis(currentMarketData);
+  const handleTriggerAnalysis = async () => {
+    try {
+      // Fetch real current market prices
+      const response = await fetch('http://localhost:8000/market/current');
+      let currentMarketData;
+
+      if (response.ok) {
+        const data = await response.json();
+        currentMarketData = {
+          ...data.prices,
+          BNB: data.prices.BNB, // Include BNB in the analysis
+          trigger: "manual",
+          timestamp: new Date().toISOString()
+        };
+        console.log('Using real market prices for analysis:', currentMarketData);
+      } else {
+        // Fallback to basic prices if API fails
+        currentMarketData = {
+          BTC: 43000,
+          ETH: 2900,
+          SOL: 99,
+          BNB: 310,
+          trigger: "manual_fallback",
+          timestamp: new Date().toISOString()
+        };
+        console.log('Using fallback prices for analysis:', currentMarketData);
+      }
+
+      triggerMarketAnalysis(currentMarketData);
+    } catch (error) {
+      console.error('Error fetching current prices for analysis:', error);
+      // Use fallback data if fetch fails
+      const fallbackData = {
+        BTC: 43000,
+        ETH: 2900,
+        SOL: 99,
+        BNB: 310,
+        trigger: "manual_error_fallback",
+        timestamp: new Date().toISOString()
+      };
+      triggerMarketAnalysis(fallbackData);
+    }
   };
 
   const handleTriggerVoting = async () => {
     setIsVoting(true);
     try {
       console.log('Triggering democratic voting...');
+
+      // Fetch real current market prices for voting
+      let marketData;
+      try {
+        const priceResponse = await fetch('http://localhost:8000/market/current');
+        if (priceResponse.ok) {
+          const priceData = await priceResponse.json();
+          marketData = {
+            ...priceData.prices,
+            symbol: 'BTC/USDT',
+            timestamp: new Date().toISOString(),
+            trigger: 'manual_voting_with_real_prices'
+          };
+          console.log('Using real market prices for voting:', marketData);
+        } else {
+          throw new Error('Price fetch failed');
+        }
+      } catch (priceError) {
+        console.log('Failed to fetch real prices, using fallback for voting');
+        marketData = {
+          BTC: 43000,
+          ETH: 2900,
+          SOL: 99,
+          BNB: 310,
+          symbol: 'BTC/USDT',
+          timestamp: new Date().toISOString(),
+          trigger: 'manual_voting_fallback'
+        };
+      }
+
       const response = await fetch('http://localhost:8000/trading/execute', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          market_data: {
-            symbol: 'BTC/USDT',
-            timestamp: new Date().toISOString(),
-            trigger: 'manual_voting'
-          },
+          market_data: marketData,
           timestamp: new Date().toISOString()
         })
       });

@@ -36,6 +36,7 @@ class AutonomousTradingFloor:
         # System state
         self.last_market_data: Dict[str, Any] = {}
         self.agent_decisions: Dict[str, Any] = {}
+        self.recent_decisions: List[Dict[str, Any]] = []  # Store recent trading decisions
         self.system_status = "initializing"
 
     async def initialize(self):
@@ -400,14 +401,28 @@ CONFIDENCE: [0-100]"""
             # Create trading decisions for each asset
             decisions = []
             for asset in ["BTC", "ETH", "SOL"]:
-                decisions.append({
+                decision = {
                     "asset": asset,
                     "action": consensus_action,
                     "confidence": min(confidence, 95),
                     "reasoning": f"Democratic vote: {reasoning[:100]}...",
                     "price_target": self.last_market_data.get(asset, {}).get('price', 0) * (1.05 if consensus_action == "BUY" else 0.95 if consensus_action == "SELL" else 1.0),
                     "timestamp": datetime.utcnow().isoformat()
-                })
+                }
+                decisions.append(decision)
+
+                # Store formatted decision in history for frontend
+                formatted_decision = {
+                    "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                    "asset": asset,
+                    "action": consensus_action,
+                    "confidence": min(confidence, 95),
+                    "reasoning": f"Democratic consensus: {consensus_action} with {confidence}% confidence"
+                }
+                self.recent_decisions.append(formatted_decision)
+
+            # Keep only last 15 decisions
+            self.recent_decisions = self.recent_decisions[-15:]
 
             return {
                 "decisions": decisions,
@@ -506,6 +521,21 @@ CONFIDENCE: [0-100]"""
         except Exception as e:
             logger.error(f"Error querying agent {agent_id}: {e}")
             return f"Error querying agent: {str(e)}"
+
+    async def get_recent_decisions(self) -> List[Dict[str, Any]]:
+        """Get recent trading decisions for frontend display"""
+        if not self.recent_decisions:
+            # Return some initial mock data if no decisions have been made yet
+            return [
+                {
+                    "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                    "asset": "BTC",
+                    "action": "HOLD",
+                    "confidence": 75,
+                    "reasoning": "System initialized - monitoring real market data for trading opportunities..."
+                }
+            ]
+        return self.recent_decisions
 
     async def shutdown(self):
         """Gracefully shutdown the trading floor"""

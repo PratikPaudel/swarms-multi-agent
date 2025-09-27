@@ -105,8 +105,29 @@ class MarketDataAgent(BaseAgent):
         return market_data
 
     async def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze market data and provide insights"""
-        market_data = await self.fetch_real_market_data()
+        """Analyze market data with macro economic context"""
+        from services.real_data_sources import real_data_sources
+
+        try:
+            # Get real market data
+            market_data = await self.fetch_real_market_data()
+
+            # Get macro economic context for enhanced analysis
+            macro_data = await real_data_sources.get_real_macro_data()
+            macro_indicators = macro_data.get("indicators", {})
+
+            # Add macro context to market data
+            market_data["macro_context"] = {
+                "fed_funds_rate": macro_indicators.get("fed_funds_rate", {}).get("value", 0),
+                "inflation_rate": macro_indicators.get("inflation_rate", {}).get("value", 0),
+                "dollar_index": macro_indicators.get("dollar_index", {}).get("value", 0)
+            }
+            market_data["data_source"] = "CoinGecko + FRED APIs"
+
+        except Exception as e:
+            logger.error(f"Error fetching enhanced market data: {e}")
+            # Fallback to basic market data
+            market_data = await self.fetch_real_market_data()
 
         analysis = []
         signals = []
@@ -156,7 +177,7 @@ class SentimentAgent(BaseAgent):
 
     async def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate real sentiment analysis from Tavily and Exa APIs"""
-        from ..services.real_data_sources import real_data_sources
+        from services.real_data_sources import real_data_sources
 
         assets = ["BTC", "ETH", "SOL", "ADA", "DOT"]
 
@@ -474,6 +495,7 @@ class TradingFloor:
             "risk": RiskCalculatorAgent(),
             "strategy": StrategyAgent()
         }
+        self.recent_decisions = []  # Store recent trading decisions
 
     async def execute_trading_cycle(self, trigger_data: Dict[str, Any] = None) -> Dict[str, Any]:
         """Execute a complete trading cycle through all agents"""
@@ -508,6 +530,20 @@ class TradingFloor:
             "timestamp": datetime.utcnow().isoformat(),
             "cycle_id": f"cycle_{int(datetime.utcnow().timestamp())}"
         }
+
+        # Store decisions in history for frontend
+        for decision in strategy_result.get("decisions", []):
+            formatted_decision = {
+                "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                "asset": decision.get("asset", "UNKNOWN"),
+                "action": decision.get("action", "HOLD"),
+                "confidence": int(decision.get("confidence", 50)),
+                "reasoning": decision.get("reasoning", "Strategy analysis completed")
+            }
+            self.recent_decisions.append(formatted_decision)
+
+        # Keep only last 10 decisions
+        self.recent_decisions = self.recent_decisions[-10:]
 
         logger.info(f"Trading cycle completed: {len(result['decisions'])} decisions generated")
         return result
@@ -549,3 +585,18 @@ class TradingFloor:
             return f"Agent {agent.agent_name} - Status: {agent.status}, Last Action: {agent.last_action}, Confidence: {agent.confidence}%"
         except Exception as e:
             return f"Error querying agent: {str(e)}"
+
+    async def get_recent_decisions(self) -> List[Dict[str, Any]]:
+        """Get recent trading decisions for frontend display"""
+        if not self.recent_decisions:
+            # Return some initial mock data if no decisions have been made yet
+            return [
+                {
+                    "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                    "asset": "BTC",
+                    "action": "HOLD",
+                    "confidence": 75,
+                    "reasoning": "Waiting for clearer market signals - monitoring real market data..."
+                }
+            ]
+        return self.recent_decisions

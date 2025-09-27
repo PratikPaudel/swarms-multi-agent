@@ -113,6 +113,97 @@ async def execute_trading_cycle(request: MarketDataRequest) -> TradingDecisionRe
         logger.error(f"Error executing trading cycle: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/trading/decisions")
+async def get_trading_decisions():
+    """Get recent trading decisions"""
+    try:
+        if not trading_floor:
+            raise HTTPException(status_code=503, detail="Trading floor not initialized")
+
+        # Get recent trading decisions from the trading floor
+        decisions = await trading_floor.get_recent_decisions()
+
+        return {
+            "decisions": decisions,
+            "timestamp": datetime.utcnow().isoformat(),
+            "total_decisions": len(decisions)
+        }
+    except Exception as e:
+        logger.error(f"Error getting trading decisions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/market/historical")
+async def get_historical_data(symbol: str = "BTC", period: str = "1d"):
+    """Get historical market data for chart display"""
+    try:
+        from services.real_data_sources import real_data_sources
+
+        # Get real historical data
+        historical_data = real_data_sources.get_real_historical_data(symbol, period)
+
+        if historical_data.empty:
+            raise HTTPException(status_code=404, detail=f"No historical data found for {symbol}")
+
+        # Convert to format expected by frontend
+        chart_data = []
+        for index, row in historical_data.tail(24).iterrows():
+            chart_data.append({
+                "time": index.strftime("%H:%M") if period == "1d" else index.strftime("%m-%d"),
+                symbol: float(row['Close']),
+                "volume": float(row['Volume']) if 'Volume' in row else 0
+            })
+
+        return {
+            "data": chart_data,
+            "symbol": symbol,
+            "period": period,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting historical data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/market/current")
+async def get_current_market_prices():
+    """Get current market prices for major cryptocurrencies"""
+    try:
+        from services.real_data_sources import real_data_sources
+
+        # Get current market data from CoinGecko
+        current_data = await real_data_sources.get_real_market_data()
+
+        # Extract current prices for the requested assets
+        prices = {}
+        asset_mapping = {
+            "BTC": "bitcoin",
+            "ETH": "ethereum",
+            "SOL": "solana",
+            "BNB": "binancecoin"
+        }
+
+        for asset, api_name in asset_mapping.items():
+            if api_name in current_data:
+                prices[asset] = current_data[api_name].get("usd", 0)
+
+        return {
+            "prices": prices,
+            "timestamp": datetime.utcnow().isoformat(),
+            "data_source": "CoinGecko API"
+        }
+    except Exception as e:
+        logger.error(f"Error getting current market prices: {e}")
+        # Fallback prices if API fails
+        return {
+            "prices": {
+                "BTC": 43000,
+                "ETH": 2900,
+                "SOL": 99,
+                "BNB": 310
+            },
+            "timestamp": datetime.utcnow().isoformat(),
+            "data_source": "Fallback data"
+        }
+
 @app.websocket("/ws/trading-floor")
 async def websocket_endpoint(websocket: WebSocket):
     """Main WebSocket endpoint for real-time communication"""

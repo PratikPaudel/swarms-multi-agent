@@ -305,7 +305,7 @@ class PortfolioAgent(Agent):
 
     async def optimize_portfolio(self, strategy_decisions: Dict[str, Any], current_portfolio: Dict[str, Any] = None) -> Dict[str, Any]:
         """Optimize portfolio allocation based on strategy decisions using real portfolio data"""
-        from ..services.real_data_sources import real_data_sources
+        from services.real_data_sources import real_data_sources
 
         try:
             # Get real portfolio data if not provided
@@ -539,7 +539,7 @@ class ExecutorAgent(Agent):
 
     async def execute_rebalancing(self, rebalancing_actions: List[Dict[str, Any]], market_conditions: Dict[str, Any] = None) -> Dict[str, Any]:
         """Execute portfolio rebalancing actions using real market microstructure data"""
-        from ..services.real_data_sources import real_data_sources
+        from services.real_data_sources import real_data_sources
 
         try:
             # Get real execution data if not provided

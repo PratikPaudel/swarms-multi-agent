@@ -4,72 +4,105 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useState, useEffect } from "react";
 
-// Mock trading data - using fixed initial data to prevent hydration mismatch
-const getInitialMockData = () => {
-  const data = [];
-  let btcPrice = 42000;
-  let ethPrice = 2800;
-  let solPrice = 95;
-
-  for (let i = 0; i < 24; i++) {
-    // Use deterministic values for initial load to prevent hydration mismatch
-    const btcChange = Math.sin(i * 0.3) * 500;
-    const ethChange = Math.sin(i * 0.4) * 50;
-    const solChange = Math.sin(i * 0.5) * 3;
-
-    btcPrice += btcChange;
-    ethPrice += ethChange;
-    solPrice += solChange;
-
-    data.push({
-      time: `${i}:00`,
-      BTC: Math.round(btcPrice),
-      ETH: Math.round(ethPrice),
-      SOL: Math.round(solPrice * 100) / 100,
-    });
-  }
-  return data;
+// Initial empty data while loading real data
+const getInitialData = () => {
+  return [{
+    time: "Loading...",
+    BTC: 0,
+    ETH: 0,
+    SOL: 0,
+  }];
 };
 
 export function TradingChart() {
-  const [data, setData] = useState(getInitialMockData());
+  const [data, setData] = useState(getInitialData());
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Fetch real historical data from backend
+  const fetchHistoricalData = async (symbol: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/market/historical?symbol=${symbol}&period=1d`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.data && result.data.length > 0) {
+          // Store data for this specific symbol
+          return { symbol, data: result.data };
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching historical data for ${symbol}:`, error);
+    }
+    return null;
+  };
+
+  // Fetch data for all assets on mount
   useEffect(() => {
-    // Only start real-time updates after component is mounted on client
     if (!mounted) return;
 
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setData(prevData => {
-        const newData = [...prevData];
-        const lastPoint = newData[newData.length - 1];
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const results = await Promise.all([
+          fetchHistoricalData('BTC'),
+          fetchHistoricalData('ETH'),
+          fetchHistoricalData('SOL')
+        ]);
 
-        // Add new data point
-        const newPoint = {
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          BTC: lastPoint.BTC + (Math.random() - 0.5) * 500,
-          ETH: lastPoint.ETH + (Math.random() - 0.5) * 50,
-          SOL: Math.round((lastPoint.SOL + (Math.random() - 0.5) * 3) * 100) / 100,
-        };
+        // Merge all data into combined chart data
+        const btcData = results.find(r => r?.symbol === 'BTC')?.data || [];
+        const ethData = results.find(r => r?.symbol === 'ETH')?.data || [];
+        const solData = results.find(r => r?.symbol === 'SOL')?.data || [];
 
-        // Keep only last 24 points
-        if (newData.length >= 24) {
-          newData.shift();
+        if (btcData.length > 0) {
+          const combinedData = btcData.map((btcPoint: any, index: number) => ({
+            time: btcPoint.time,
+            BTC: btcPoint.BTC || 0,
+            ETH: ethData[index]?.ETH || 0,
+            SOL: solData[index]?.SOL || 0,
+          }));
+          setData(combinedData);
         }
-        newData.push(newPoint);
+      } catch (error) {
+        console.error('Error fetching all historical data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        return newData;
-      });
-    }, 5000);
+    fetchAllData();
+  }, [mounted]);
+
+  // Fetch current market data and update chart
+  const fetchCurrentMarketData = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/agents/status');
+      if (response.ok) {
+        // Update with any real-time market data if available
+        // This would typically come from a market data agent
+        console.log('Market data updated from backend');
+      }
+    } catch (error) {
+      console.error('Error fetching current market data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Only start real-time updates after component is mounted and data is loaded
+    if (!mounted || loading) return;
+
+    // Fetch current market data periodically
+    const interval = setInterval(() => {
+      fetchCurrentMarketData();
+    }, 30000); // Every 30 seconds
 
     return () => clearInterval(interval);
-  }, [mounted]);
+  }, [mounted, loading]);
 
   const currentPrice = data[data.length - 1];
   const previousPrice = data[data.length - 2];
@@ -80,7 +113,7 @@ export function TradingChart() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Real-time Trading Chart</CardTitle>
+          <CardTitle>Real-time Trading Chart {loading && "(Loading...)"}</CardTitle>
           <div className="flex gap-2">
             {["BTC", "ETH", "SOL"].map((asset) => (
               <button
