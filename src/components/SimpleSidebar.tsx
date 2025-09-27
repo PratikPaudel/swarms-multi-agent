@@ -28,20 +28,20 @@ export function SimpleSidebar({ activeTab, setActiveTab }: SimpleSidebarProps) {
 
   return (
     <div className={cn(
-      "flex flex-col bg-muted/10 border-r transition-all duration-300",
+      "flex flex-col bg-[#111111] border-r border-[#2a2a2a] transition-all duration-300",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border-[#2a2a2a]">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <h2 className="text-lg font-semibold">Navigation</h2>
+            <h2 className="text-lg font-semibold text-white">Navigation</h2>
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 text-[#a0a0a0] hover:text-white hover:bg-[#2a2a2a]"
           >
             {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
           </Button>
@@ -54,10 +54,13 @@ export function SimpleSidebar({ activeTab, setActiveTab }: SimpleSidebarProps) {
           {navigationItems.map((item) => (
             <Button
               key={item.id}
-              variant={activeTab === item.id ? "default" : "ghost"}
+              variant="ghost"
               className={cn(
-                "w-full justify-start",
-                isCollapsed ? "px-2" : "px-4"
+                "w-full justify-start transition-all duration-200",
+                isCollapsed ? "px-2" : "px-4",
+                activeTab === item.id
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "text-[#a0a0a0] hover:text-white hover:bg-[#2a2a2a]"
               )}
               onClick={() => setActiveTab(item.id)}
             >

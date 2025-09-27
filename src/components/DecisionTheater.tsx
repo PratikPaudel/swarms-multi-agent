@@ -1,0 +1,460 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Brain, Activity, TrendingUp, TrendingDown, Target, Vote, Zap, CheckCircle, Clock, X } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+
+interface AgentThought {
+  id: string;
+  agentName: string;
+  tier: number;
+  vote: string;
+  reasoning: string;
+  confidence: number;
+  timestamp: string;
+  status: 'thinking' | 'completed' | 'pending';
+}
+
+interface DecisionTheaterProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onStartVoting: () => Promise<void>;
+}
+
+export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionTheaterProps) {
+  const [currentPhase, setCurrentPhase] = useState<'init' | 'data-collection' | 'tier1' | 'tier2' | 'tier3' | 'consensus' | 'complete'>('init');
+  const [agentThoughts, setAgentThoughts] = useState<AgentThought[]>([]);
+  const [isVoting, setIsVoting] = useState(false);
+  const [consensusResult, setConsensusResult] = useState<any>(null);
+  const [marketData, setMarketData] = useState<any>(null);
+
+  // Simulate the agent thinking process
+  const simulateAgentFlow = async () => {
+    setIsVoting(true);
+    setCurrentPhase('data-collection');
+
+    // Simulate market data collection
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setMarketData({
+      BTC: { price: 107500, change: -1.92 },
+      ETH: { price: 3950, change: -1.75 },
+      SOL: { price: 195, change: -4.25 },
+      BNB: { price: 950, change: -2.1 }
+    });
+
+    // Tier 1: Intelligence Gathering
+    setCurrentPhase('tier1');
+    const tier1Agents = [
+      { id: 'market_data', name: 'Market-Data-Collector', tier: 1 },
+      { id: 'sentiment', name: 'Sentiment-Analyzer', tier: 1 },
+      { id: 'onchain', name: 'On-Chain-Monitor', tier: 1 }
+    ];
+
+    for (const agent of tier1Agents) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const thought: AgentThought = {
+        id: agent.id,
+        agentName: agent.name,
+        tier: agent.tier,
+        vote: 'ANALYZING',
+        reasoning: `Analyzing current market data: BTC down 1.92%, ETH down 1.75%, SOL down 4.25%. Market showing signs of consolidation with moderate volume. Overall sentiment appears cautious but not bearish.`,
+        confidence: Math.floor(Math.random() * 20) + 70,
+        timestamp: new Date().toLocaleTimeString(),
+        status: 'completed'
+      };
+      setAgentThoughts(prev => [...prev, thought]);
+    }
+
+    // Tier 2: Analysis
+    setCurrentPhase('tier2');
+    const tier2Agents = [
+      { id: 'technical', name: 'Technical-Analyst', tier: 2 },
+      { id: 'risk', name: 'Risk-Calculator', tier: 2 },
+      { id: 'correlation', name: 'Correlation-Analyzer', tier: 2 }
+    ];
+
+    for (const agent of tier2Agents) {
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      const thought: AgentThought = {
+        id: agent.id,
+        agentName: agent.name,
+        tier: agent.tier,
+        vote: 'HOLD',
+        reasoning: `The current market data shows a moderate pullback across major cryptocurrencies, suggesting a potential consolidation phase. Technical indicators show oversold conditions but not extreme. Risk assessment indicates prudent to hold positions.`,
+        confidence: Math.floor(Math.random() * 15) + 70,
+        timestamp: new Date().toLocaleTimeString(),
+        status: 'completed'
+      };
+      setAgentThoughts(prev => [...prev, thought]);
+    }
+
+    // Tier 3: Strategy & Execution
+    setCurrentPhase('tier3');
+    const tier3Agents = [
+      { id: 'strategy', name: 'Strategy-Synthesizer', tier: 3 },
+      { id: 'portfolio', name: 'Portfolio-Optimizer', tier: 3 },
+      { id: 'executor', name: 'Trade-Executor', tier: 3 }
+    ];
+
+    for (const agent of tier3Agents) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      const thought: AgentThought = {
+        id: agent.id,
+        agentName: agent.name,
+        tier: agent.tier,
+        vote: 'HOLD',
+        reasoning: agent.name === 'Trade-Executor'
+          ? `Based on analysis from all agents, executing HOLD strategy. Current market conditions warrant patience. Setting stop-losses at 5% below current levels. Monitoring for better entry points.`
+          : `Market consolidation phase detected. Recommend maintaining current positions while monitoring for trend reversal signals. Portfolio allocation remains optimal for current volatility levels.`,
+        confidence: Math.floor(Math.random() * 20) + 75,
+        timestamp: new Date().toLocaleTimeString(),
+        status: 'completed'
+      };
+      setAgentThoughts(prev => [...prev, thought]);
+    }
+
+    // Consensus Phase
+    setCurrentPhase('consensus');
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const consensus = {
+      consensus_action: 'HOLD',
+      overall_confidence: 75,
+      agent_votes: {
+        'market_data': 'HOLD',
+        'sentiment': 'HOLD',
+        'onchain': 'HOLD',
+        'technical': 'HOLD',
+        'risk': 'HOLD',
+        'correlation': 'HOLD',
+        'strategy': 'HOLD',
+        'portfolio': 'HOLD',
+        'executor': 'HOLD'
+      },
+      democracy_summary: 'Unanimous HOLD decision based on market consolidation analysis'
+    };
+
+    setConsensusResult(consensus);
+    setCurrentPhase('complete');
+    setIsVoting(false);
+
+    // Call the actual voting function
+    await onStartVoting();
+  };
+
+  const handleStartDemo = () => {
+    setAgentThoughts([]);
+    setConsensusResult(null);
+    setMarketData(null);
+    simulateAgentFlow();
+  };
+
+  const resetTheater = () => {
+    setCurrentPhase('init');
+    setAgentThoughts([]);
+    setConsensusResult(null);
+    setMarketData(null);
+    setIsVoting(false);
+  };
+
+  const getTierIcon = (tier: number) => {
+    switch (tier) {
+      case 1: return Brain;
+      case 2: return Activity;
+      case 3: return Zap;
+      default: return Target;
+    }
+  };
+
+  const getTierColor = (tier: number) => {
+    switch (tier) {
+      case 1: return 'text-green-400 bg-green-500/20';
+      case 2: return 'text-blue-400 bg-blue-500/20';
+      case 3: return 'text-purple-400 bg-purple-500/20';
+      default: return 'text-yellow-400 bg-yellow-500/20';
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[98vw] w-full h-[95vh] bg-[#0a0a0a] border-[#2a2a2a] text-white flex flex-col">
+        <DialogHeader className="border-b border-[#2a2a2a] pb-6 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 lg:gap-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                <Vote className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+              </div>
+              <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4">
+                <span>AI Decision Theater</span>
+                <span className="text-sm sm:text-base lg:text-lg font-normal text-gray-400 hidden lg:block">Multi-Agent Democracy in Action</span>
+              </div>
+            </DialogTitle>
+            <div className="flex items-center gap-2 lg:gap-4">
+              <Badge variant="outline" className="bg-[#1a1a1a] border-[#2a2a2a] text-white px-2 lg:px-4 py-1 lg:py-2 text-xs lg:text-sm">
+                Phase: {currentPhase.replace('-', ' ').toUpperCase()}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+                className="bg-[#1a1a1a] border-[#2a2a2a] text-white hover:bg-[#2a2a2a] p-2 lg:p-3"
+              >
+                <X className="w-4 h-4 lg:w-5 lg:h-5" />
+              </Button>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-8 py-6 overflow-hidden">
+          {/* Left Panel - Process Flow */}
+          <div className="lg:col-span-3 space-y-6 lg:max-h-full lg:overflow-y-auto">
+            <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-6">Democratic Process</h3>
+
+                {currentPhase === 'init' && (
+                  <div className="text-center py-8 lg:py-12">
+                    <div className="mb-4 lg:mb-6">
+                      <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Vote className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+                      </div>
+                      <p className="text-gray-400 text-xs lg:text-sm mb-4 lg:mb-6 px-2">Launch the multi-agent democratic decision making process</p>
+                    </div>
+                    <Button
+                      onClick={handleStartDemo}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 lg:px-10 py-2 lg:py-4 text-sm lg:text-lg"
+                      size="lg"
+                    >
+                      <Vote className="w-4 h-4 lg:w-6 lg:h-6 mr-2 lg:mr-3" />
+                      Start Democracy
+                    </Button>
+                  </div>
+                )}
+
+                {currentPhase !== 'init' && (
+                  <div className="space-y-3">
+                    {/* Data Collection Phase */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      currentPhase === 'data-collection' ? 'bg-blue-500/20 border border-blue-500/30' :
+                      ['tier1', 'tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                    }`}>
+                      {['tier1', 'tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ?
+                        <CheckCircle className="w-5 h-5 text-green-400" /> :
+                        currentPhase === 'data-collection' ?
+                        <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" /> :
+                        <Clock className="w-5 h-5 text-gray-500" />
+                      }
+                      <span>Data Collection</span>
+                    </div>
+
+                    {/* Tier 1 */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      currentPhase === 'tier1' ? 'bg-green-500/20 border border-green-500/30' :
+                      ['tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                    }`}>
+                      {['tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ?
+                        <CheckCircle className="w-5 h-5 text-green-400" /> :
+                        currentPhase === 'tier1' ?
+                        <div className="animate-spin w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full" /> :
+                        <Clock className="w-5 h-5 text-gray-500" />
+                      }
+                      <span>Tier 1: Intelligence</span>
+                    </div>
+
+                    {/* Tier 2 */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      currentPhase === 'tier2' ? 'bg-blue-500/20 border border-blue-500/30' :
+                      ['tier3', 'consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                    }`}>
+                      {['tier3', 'consensus', 'complete'].includes(currentPhase) ?
+                        <CheckCircle className="w-5 h-5 text-green-400" /> :
+                        currentPhase === 'tier2' ?
+                        <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" /> :
+                        <Clock className="w-5 h-5 text-gray-500" />
+                      }
+                      <span>Tier 2: Analysis</span>
+                    </div>
+
+                    {/* Tier 3 */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      currentPhase === 'tier3' ? 'bg-purple-500/20 border border-purple-500/30' :
+                      ['consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                    }`}>
+                      {['consensus', 'complete'].includes(currentPhase) ?
+                        <CheckCircle className="w-5 h-5 text-green-400" /> :
+                        currentPhase === 'tier3' ?
+                        <div className="animate-spin w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full" /> :
+                        <Clock className="w-5 h-5 text-gray-500" />
+                      }
+                      <span>Tier 3: Strategy</span>
+                    </div>
+
+                    {/* Consensus */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      currentPhase === 'consensus' ? 'bg-yellow-500/20 border border-yellow-500/30' :
+                      currentPhase === 'complete' ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                    }`}>
+                      {currentPhase === 'complete' ?
+                        <CheckCircle className="w-5 h-5 text-green-400" /> :
+                        currentPhase === 'consensus' ?
+                        <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" /> :
+                        <Clock className="w-5 h-5 text-gray-500" />
+                      }
+                      <span>Democratic Consensus</span>
+                    </div>
+                  </div>
+                )}
+
+                {currentPhase === 'complete' && (
+                  <div className="mt-4 pt-4 border-t border-[#2a2a2a]">
+                    <Button
+                      onClick={resetTheater}
+                      variant="outline"
+                      size="sm"
+                      className="w-full bg-[#2a2a2a] border-[#3a3a3a] text-white hover:bg-[#3a3a3a]"
+                    >
+                      Reset Theater
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Market Data Display */}
+            {marketData && (
+              <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+                <CardContent className="p-6">
+                  <h4 className="font-semibold text-lg mb-4">Market Data</h4>
+                  <div className="space-y-3">
+                    {Object.entries(marketData).map(([symbol, data]: [string, any]) => (
+                      <div key={symbol} className="flex justify-between items-center p-3 bg-[#0f0f0f] rounded-lg border border-[#2a2a2a]">
+                        <span className="font-medium text-white">{symbol}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-white">${data.price.toLocaleString()}</span>
+                          <span className={`flex items-center gap-1 font-medium px-2 py-1 rounded ${
+                            data.change >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
+                          }`}>
+                            {data.change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                            {Math.abs(data.change)}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Panel - Agent Thoughts Stream */}
+          <div className="lg:col-span-9 flex-1 min-h-0">
+            <Card className="bg-[#1a1a1a] border-[#2a2a2a] h-full flex flex-col">
+              <CardContent className="p-0 h-full flex flex-col">
+                <div className="p-6 border-b border-[#2a2a2a] flex-shrink-0">
+                  <h3 className="text-xl font-bold">Live Agent Thinking Stream</h3>
+                  <p className="text-gray-400 text-sm mt-1">Real-time multi-agent consensus building</p>
+                </div>
+
+                <ScrollArea className="flex-1 p-6">
+                  {agentThoughts.length === 0 && currentPhase === 'init' && (
+                    <div className="text-center py-12 lg:py-20 text-[#a0a0a0]">
+                      <Brain className="w-16 h-16 lg:w-20 lg:h-20 mx-auto mb-4 lg:mb-6 opacity-50" />
+                      <h4 className="text-lg lg:text-xl font-semibold mb-2">Waiting for Democracy</h4>
+                      <p className="text-sm lg:text-lg px-4">Start democracy to see AI agents thinking in real-time</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-6">
+                    {agentThoughts.map((thought, index) => {
+                      const IconComponent = getTierIcon(thought.tier);
+                      return (
+                        <div
+                          key={thought.id}
+                          className="animate-fadeIn opacity-0"
+                          style={{
+                            animation: `fadeIn 0.5s ease-in-out ${index * 0.2}s forwards`
+                          }}
+                        >
+                          <div className="border border-[#2a2a2a] rounded-xl p-4 lg:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#1f1f1f] hover:border-[#3a3a3a] transition-all hover:shadow-lg">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 lg:mb-4 gap-3">
+                              <div className="flex items-center gap-3 lg:gap-4">
+                                <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center ${getTierColor(thought.tier)}`}>
+                                  <IconComponent className="w-5 h-5 lg:w-6 lg:h-6" />
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-base lg:text-lg">{thought.agentName}</div>
+                                  <div className="text-xs lg:text-sm text-[#a0a0a0]">Tier {thought.tier} • {thought.timestamp}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 lg:gap-3 self-start sm:self-center">
+                                <Badge
+                                  variant="outline"
+                                  className={`border-0 font-semibold px-2 lg:px-3 py-1 text-xs lg:text-sm ${
+                                    thought.vote === 'BUY' ? 'bg-green-500/20 text-green-400' :
+                                    thought.vote === 'SELL' ? 'bg-red-500/20 text-red-400' :
+                                    thought.vote === 'HOLD' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                  }`}
+                                >
+                                  {thought.vote}
+                                </Badge>
+                                <div className="text-right">
+                                  <div className="text-xs lg:text-sm font-semibold text-white">{thought.confidence}%</div>
+                                  <div className="text-xs text-[#a0a0a0]">confidence</div>
+                                </div>
+                              </div>
+                            </div>
+                            <p className="text-sm lg:text-base text-[#e0e0e0] leading-relaxed">{thought.reasoning}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Consensus Result */}
+                    {consensusResult && (
+                      <div className="animate-fadeIn border-2 border-green-500/30 rounded-2xl p-6 lg:p-8 bg-gradient-to-r from-green-500/10 to-blue-500/10 shadow-2xl">
+                        <div className="text-center">
+                          <div className="text-3xl lg:text-5xl font-bold text-green-400 mb-2 lg:mb-3">
+                            {consensusResult.consensus_action}
+                          </div>
+                          <div className="text-lg lg:text-2xl text-white mb-1 lg:mb-2">
+                            Democratic Consensus Reached
+                          </div>
+                          <div className="text-base lg:text-lg text-green-400 mb-4 lg:mb-6">
+                            {consensusResult.overall_confidence}% Overall Confidence
+                          </div>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-3">
+                            {Object.entries(consensusResult.agent_votes).map(([agent, vote]) => (
+                              <div key={agent} className="text-xs lg:text-sm p-2 lg:p-3 bg-[#1a1a1a] rounded-lg border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all">
+                                <div className="capitalize font-medium text-gray-300">{agent.replace('_', ' ')}</div>
+                                <div className="font-bold text-sm lg:text-lg text-white">{vote as string}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out forwards;
+          }
+        `}</style>
+      </DialogContent>
+    </Dialog>
+  );
+}

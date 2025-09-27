@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SimpleSidebar } from "@/components/SimpleSidebar";
-import { CoinAnalytics } from "@/components/CoinAnalytics";
-import { DecisionHub } from "@/components/DecisionHub";
+import { ModernCoinAnalytics } from "@/components/ModernCoinAnalytics";
+import { ModernDecisionHub } from "@/components/ModernDecisionHub";
+import { DecisionTheater } from "@/components/DecisionTheater";
 import { Activity, Brain, TrendingUp, Shield, Target, Zap, RefreshCw, Vote } from "lucide-react";
 
 interface TradingDecisionResponse {
@@ -116,6 +117,7 @@ export default function TradingFloor() {
 
   const [votingResults, setVotingResults] = useState<any>(null);
   const [isVoting, setIsVoting] = useState(false);
+  const [showDecisionTheater, setShowDecisionTheater] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -184,8 +186,11 @@ export default function TradingFloor() {
     }
   };
 
-  const handleTriggerVoting = async () => {
-    setIsVoting(true);
+  const handleTriggerVoting = () => {
+    setShowDecisionTheater(true);
+  };
+
+  const handleDecisionTheaterVoting = async (onVotingComplete: (results: any) => void) => {
     try {
       let marketData;
       try {
@@ -245,78 +250,97 @@ export default function TradingFloor() {
           };
           setTradingDecisions(prev => [newDecision, ...prev.slice(0, 4)]);
         }
+
+        onVotingComplete(votingData);
       } else {
         console.error('Failed to trigger voting:', response.status);
+        onVotingComplete(null);
       }
     } catch (error) {
       console.error('Error triggering voting:', error);
-    } finally {
-      setIsVoting(false);
+      onVotingComplete(null);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-[#0a0a0a]">
       <SimpleSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="border-b bg-background p-4">
-          <div className="flex items-center justify-between">
+        <div className="border-b border-[#2a2a2a] bg-[#0a0a0a] p-6">
+          <div className="max-w-[1400px] mx-auto flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Autonomous Trading Floor</h1>
-              <p className="text-muted-foreground text-sm">AI-powered multi-agent trading system</p>
+              <h1 className="text-2xl font-bold tracking-tight text-white">Autonomous Trading Floor</h1>
+              <p className="text-[#a0a0a0] text-sm">AI-powered multi-agent trading system</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Badge
-                variant={connectionStatus === "Connected" ? "default" : "destructive"}
-                className="flex items-center gap-1"
+                variant="outline"
+                className={`border-0 font-medium ${
+                  connectionStatus === "Connected"
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-red-500/20 text-red-400"
+                } flex items-center gap-2`}
               >
-                <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`} />
+                <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-400" : "bg-red-400"}`} />
                 {connectionStatus}
               </Badge>
               {connectionStatus !== "Connected" && (
-                <Button size="sm" variant="outline" onClick={reconnect}>
-                  <RefreshCw className="w-4 h-4 mr-1" />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={reconnect}
+                  className="bg-[#1a1a1a] border-[#2a2a2a] text-white hover:bg-[#2a2a2a]"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   Reconnect
                 </Button>
               )}
-              <Button size="sm" onClick={handleTriggerAnalysis} disabled={connectionStatus !== "Connected"}>
-                <Zap className="w-4 h-4 mr-1" />
+              <Button
+                size="sm"
+                onClick={handleTriggerAnalysis}
+                disabled={connectionStatus !== "Connected"}
+                className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+              >
+                <Zap className="w-4 h-4 mr-2" />
                 Trigger Analysis
               </Button>
-              <Button size="sm" onClick={handleTriggerVoting} disabled={isVoting || connectionStatus !== "Connected"} variant="outline">
-                {isVoting ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1" />
-                    Voting...
-                  </>
-                ) : (
-                  <>
-                    <Vote className="w-4 h-4 mr-1" />
-                    Start Democracy
-                  </>
-                )}
+              <Button
+                size="sm"
+                onClick={handleTriggerVoting}
+                disabled={connectionStatus !== "Connected"}
+                variant="outline"
+                className="bg-[#1a1a1a] border-[#2a2a2a] text-white hover:bg-[#2a2a2a]"
+              >
+                <Vote className="w-4 h-4 mr-2" />
+                Start Democracy
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 p-6">
+        <div className="flex-1 bg-[#0a0a0a]">
           {activeTab === "coin-analytics" && (
-            <CoinAnalytics
-              agents={agents}
-              votingResults={votingResults}
-              onTriggerVoting={handleTriggerVoting}
-              isVoting={isVoting}
-            />
+            <ModernCoinAnalytics />
           )}
           {activeTab === "decision-hub" && (
-            <DecisionHub
+            <ModernDecisionHub
               agents={agents}
               decisions={tradingDecisions}
               votingResults={votingResults}
             />
           )}
         </div>
+
+        {/* Decision Theater Modal */}
+        <DecisionTheater
+          isOpen={showDecisionTheater}
+          onClose={() => setShowDecisionTheater(false)}
+          onStartVoting={async () => {
+            return new Promise((resolve) => {
+              handleDecisionTheaterVoting(resolve);
+            });
+          }}
+        />
       </div>
     </div>
   );
