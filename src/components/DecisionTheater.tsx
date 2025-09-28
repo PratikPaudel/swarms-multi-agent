@@ -22,17 +22,106 @@ interface DecisionTheaterProps {
   isOpen: boolean;
   onClose: () => void;
   onStartVoting: () => Promise<void>;
+  onTriggerAnalysis?: () => Promise<void>;
   onConsensus?: (results: any) => void;
 }
 
-export function DecisionTheater({ isOpen, onClose, onStartVoting, onConsensus }: DecisionTheaterProps) {
-  const [currentPhase, setCurrentPhase] = useState<'init' | 'data-collection' | 'tier1' | 'tier2' | 'tier3' | 'consensus' | 'complete'>('init');
+export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnalysis, onConsensus }: DecisionTheaterProps) {
+  const [currentPhase, setCurrentPhase] = useState<'init' | 'analysis-only' | 'data-collection' | 'tier1' | 'tier2' | 'tier3' | 'consensus' | 'complete'>('init');
   const [agentThoughts, setAgentThoughts] = useState<AgentThought[]>([]);
   const [isVoting, setIsVoting] = useState(false);
   const [consensusResult, setConsensusResult] = useState<any>(null);
   const [marketData, setMarketData] = useState<any>(null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
 
-  // Simulate the agent thinking process
+  // Simulate analysis-only workflow (Tier 1 + 2)
+  const simulateAnalysisFlow = async () => {
+    setIsVoting(true);
+    setCurrentPhase('data-collection');
+
+    // Simulate market data collection
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setMarketData({
+      BTC: { price: 107500, change: -1.92 },
+      ETH: { price: 3950, change: -1.75 },
+      SOL: { price: 195, change: -4.25 },
+      BNB: { price: 950, change: -2.1 }
+    });
+
+    // Tier 1: Intelligence Gathering
+    setCurrentPhase('tier1');
+    const tier1Agents = [
+      { id: 'market_data', name: 'Market-Data-Collector', tier: 1 },
+      { id: 'sentiment', name: 'Sentiment-Analyzer', tier: 1 },
+      { id: 'onchain', name: 'On-Chain-Monitor', tier: 1 }
+    ];
+
+    for (const agent of tier1Agents) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const thought: AgentThought = {
+        id: agent.id,
+        agentName: agent.name,
+        tier: agent.tier,
+        vote: 'ANALYZING',
+        reasoning: `Analyzing current market data: BTC down 1.92%, ETH down 1.75%, SOL down 4.25%. Market showing signs of consolidation with moderate volume. Overall sentiment appears cautious but not bearish.`,
+        confidence: Math.floor(Math.random() * 20) + 70,
+        timestamp: new Date().toLocaleTimeString(),
+        status: 'completed'
+      };
+      setAgentThoughts(prev => [...prev, thought]);
+    }
+
+    // Tier 2: Analysis
+    setCurrentPhase('tier2');
+    const tier2Agents = [
+      { id: 'technical', name: 'Technical-Analyst', tier: 2 },
+      { id: 'risk', name: 'Risk-Calculator', tier: 2 },
+      { id: 'correlation', name: 'Correlation-Analyzer', tier: 2 }
+    ];
+
+    for (const agent of tier2Agents) {
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      const thought: AgentThought = {
+        id: agent.id,
+        agentName: agent.name,
+        tier: agent.tier,
+        vote: 'ANALYSIS',
+        reasoning: `The current market data shows a moderate pullback across major cryptocurrencies, suggesting a potential consolidation phase. Technical indicators show oversold conditions but not extreme. Risk assessment indicates prudent approach needed.`,
+        confidence: Math.floor(Math.random() * 15) + 70,
+        timestamp: new Date().toLocaleTimeString(),
+        status: 'completed'
+      };
+      setAgentThoughts(prev => [...prev, thought]);
+    }
+
+    // Analysis complete - no voting
+    setCurrentPhase('analysis-only');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const analysis = {
+      analysis_type: 'intelligence_and_analysis',
+      market_data: {
+        BTC: { price: 107500, change: -1.92 },
+        ETH: { price: 3950, change: -1.75 },
+        SOL: { price: 195, change: -4.25 },
+        BNB: { price: 950, change: -2.1 }
+      },
+      tiers_completed: ['tier1_intelligence', 'tier2_analysis'],
+      status: 'analysis_complete',
+      summary: 'Market analysis complete. Agents have gathered intelligence and performed technical analysis without making trading decisions.'
+    };
+
+    setAnalysisResults(analysis);
+    setCurrentPhase('complete');
+    setIsVoting(false);
+
+    // Call the actual analysis function
+    if (onTriggerAnalysis) {
+      await onTriggerAnalysis();
+    }
+  };
+
+  // Simulate the full democratic process (all tiers + voting)
   const simulateAgentFlow = async () => {
     setIsVoting(true);
     setCurrentPhase('data-collection');
@@ -156,14 +245,24 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onConsensus }:
   const handleStartDemo = () => {
     setAgentThoughts([]);
     setConsensusResult(null);
+    setAnalysisResults(null);
     setMarketData(null);
     simulateAgentFlow();
+  };
+
+  const handleStartAnalysis = () => {
+    setAgentThoughts([]);
+    setConsensusResult(null);
+    setAnalysisResults(null);
+    setMarketData(null);
+    simulateAnalysisFlow();
   };
 
   const resetTheater = () => {
     setCurrentPhase('init');
     setAgentThoughts([]);
     setConsensusResult(null);
+    setAnalysisResults(null);
     setMarketData(null);
     setIsVoting(false);
   };
@@ -220,20 +319,61 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onConsensus }:
 
                 {currentPhase === 'init' && (
                   <div className="text-center py-8 lg:py-12">
-                    <div className="mb-4 lg:mb-6">
+                    <div className="mb-6 lg:mb-8">
                       <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <Vote className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
                       </div>
-                      <p className="text-gray-400 text-xs lg:text-sm mb-4 lg:mb-6 px-2">Launch the multi-agent democratic decision making process</p>
+                      <h4 className="text-lg lg:text-xl font-semibold mb-2">Choose Your Analysis Mode</h4>
+                      <p className="text-gray-400 text-xs lg:text-sm mb-6 lg:mb-8 px-2">Quick insights or full democratic decision making</p>
                     </div>
-                    <Button
-                      onClick={handleStartDemo}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 lg:px-10 py-2 lg:py-4 text-sm lg:text-lg"
-                      size="lg"
-                    >
-                      <Vote className="w-4 h-4 lg:w-6 lg:h-6 mr-2 lg:mr-3" />
-                      Start Democracy
-                    </Button>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 max-w-2xl mx-auto">
+                      {/* Trigger Analysis Button */}
+                      <div className="bg-[#2a2a2a] rounded-xl p-4 lg:p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-all">
+                        <div className="mb-3 lg:mb-4">
+                          <Brain className="w-8 h-8 lg:w-10 lg:h-10 text-blue-400 mx-auto mb-2" />
+                          <h5 className="font-semibold text-sm lg:text-base">Trigger Analysis</h5>
+                          <p className="text-xs lg:text-sm text-gray-400 mt-1">Quick market insights</p>
+                        </div>
+                        <ul className="text-xs text-gray-300 mb-4 space-y-1">
+                          <li>• Tiers 1-2 only (6 agents)</li>
+                          <li>• 15-20 seconds</li>
+                          <li>• No trading decision</li>
+                          <li>• Market intelligence</li>
+                        </ul>
+                        <Button
+                          onClick={handleStartAnalysis}
+                          className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-sm"
+                          size="sm"
+                        >
+                          <Brain className="w-4 h-4 mr-2" />
+                          Start Analysis
+                        </Button>
+                      </div>
+
+                      {/* Start Democracy Button */}
+                      <div className="bg-[#2a2a2a] rounded-xl p-4 lg:p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-all">
+                        <div className="mb-3 lg:mb-4">
+                          <Vote className="w-8 h-8 lg:w-10 lg:h-10 text-purple-400 mx-auto mb-2" />
+                          <h5 className="font-semibold text-sm lg:text-base">Start Democracy</h5>
+                          <p className="text-xs lg:text-sm text-gray-400 mt-1">Full democratic process</p>
+                        </div>
+                        <ul className="text-xs text-gray-300 mb-4 space-y-1">
+                          <li>• All 3 tiers (9 agents)</li>
+                          <li>• 30+ seconds</li>
+                          <li>• BUY/SELL/HOLD decision</li>
+                          <li>• Democratic voting</li>
+                        </ul>
+                        <Button
+                          onClick={handleStartDemo}
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm"
+                          size="sm"
+                        >
+                          <Vote className="w-4 h-4 mr-2" />
+                          Start Democracy
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -278,31 +418,43 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onConsensus }:
                       <span>Tier 2: Analysis</span>
                     </div>
 
-                    {/* Tier 3 */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'tier3' ? 'bg-purple-500/20 border border-purple-500/30' :
-                      ['consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                      }`}>
-                      {['consensus', 'complete'].includes(currentPhase) ?
-                        <CheckCircle className="w-5 h-5 text-green-400" /> :
-                        currentPhase === 'tier3' ?
-                          <div className="animate-spin w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full" /> :
-                          <Clock className="w-5 h-5 text-gray-500" />
-                      }
-                      <span>Tier 3: Strategy</span>
-                    </div>
+                    {/* Tier 3 - Skip for analysis-only */}
+                    {currentPhase !== 'analysis-only' && (
+                      <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'tier3' ? 'bg-purple-500/20 border border-purple-500/30' :
+                        ['consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                        }`}>
+                        {['consensus', 'complete'].includes(currentPhase) ?
+                          <CheckCircle className="w-5 h-5 text-green-400" /> :
+                          currentPhase === 'tier3' ?
+                            <div className="animate-spin w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full" /> :
+                            <Clock className="w-5 h-5 text-gray-500" />
+                        }
+                        <span>Tier 3: Strategy</span>
+                      </div>
+                    )}
 
-                    {/* Consensus */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'consensus' ? 'bg-yellow-500/20 border border-yellow-500/30' :
-                      currentPhase === 'complete' ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                      }`}>
-                      {currentPhase === 'complete' ?
-                        <CheckCircle className="w-5 h-5 text-green-400" /> :
-                        currentPhase === 'consensus' ?
-                          <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" /> :
-                          <Clock className="w-5 h-5 text-gray-500" />
-                      }
-                      <span>Democratic Consensus</span>
-                    </div>
+                    {/* Analysis Complete - For analysis-only mode */}
+                    {currentPhase === 'analysis-only' && (
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/20 border border-blue-500/30">
+                        <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" />
+                        <span>Analysis Complete</span>
+                      </div>
+                    )}
+
+                    {/* Consensus - Skip for analysis-only */}
+                    {currentPhase !== 'analysis-only' && (
+                      <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'consensus' ? 'bg-yellow-500/20 border border-yellow-500/30' :
+                        currentPhase === 'complete' ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
+                        }`}>
+                        {currentPhase === 'complete' ?
+                          <CheckCircle className="w-5 h-5 text-green-400" /> :
+                          currentPhase === 'consensus' ?
+                            <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" /> :
+                            <Clock className="w-5 h-5 text-gray-500" />
+                        }
+                        <span>Democratic Consensus</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -378,6 +530,40 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onConsensus }:
                         </div>
                       );
                     })}
+
+                    {/* Analysis Result (for analysis-only mode) */}
+                    {analysisResults && (
+                      <div className="animate-fadeIn border-2 border-blue-500/30 rounded-2xl p-6 lg:p-8 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 shadow-2xl">
+                        <div className="text-center">
+                          <div className="text-3xl lg:text-5xl font-bold text-blue-400 mb-2 lg:mb-3">
+                            ANALYSIS COMPLETE
+                          </div>
+                          <div className="text-lg lg:text-2xl text-white mb-1 lg:mb-2">
+                            Market Intelligence Gathered
+                          </div>
+                          <div className="text-base lg:text-lg text-blue-400 mb-4 lg:mb-6">
+                            Tiers 1-2 Analysis Complete
+                          </div>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-3 mb-4">
+                            {analysisResults.agents_involved?.tier1?.map((agent: string) => (
+                              <div key={agent} className="text-xs lg:text-sm p-2 lg:p-3 bg-[#1a1a1a] rounded-lg border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all">
+                                <div className="capitalize font-medium text-green-300">{agent.replace('_', ' ')}</div>
+                                <div className="font-bold text-xs text-gray-400">Tier 1</div>
+                              </div>
+                            ))}
+                            {analysisResults.agents_involved?.tier2?.map((agent: string) => (
+                              <div key={agent} className="text-xs lg:text-sm p-2 lg:p-3 bg-[#1a1a1a] rounded-lg border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all">
+                                <div className="capitalize font-medium text-blue-300">{agent.replace('_', ' ')}</div>
+                                <div className="font-bold text-xs text-gray-400">Tier 2</div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="text-sm text-gray-300 bg-[#1a1a1a] rounded-lg p-4 border border-[#2a2a2a]">
+                            <strong>Summary:</strong> {analysisResults.summary || "Market analysis complete. Ready for decision making if needed."}
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Consensus Result */}
                     {consensusResult && (

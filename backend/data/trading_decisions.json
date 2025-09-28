@@ -1,0 +1,209 @@
+{
+  "trading_decisions": [
+    {
+      "id": "decision_20250928_011802_264676",
+      "timestamp": "2025-09-28T00:57:02.264632",
+      "saved_at": "2025-09-28 01:18:02",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "SELL",
+          "confidence": 92,
+          "reasoning": "Democratic consensus 1: SELL recommendation based on multi-agent analysis",
+          "price_target": 43097,
+          "timestamp": "2025-09-28T00:57:02.264632"
+        }
+      ],
+      "consensus_action": "SELL",
+      "overall_confidence": 92,
+      "risk_assessment": "High",
+      "democracy_summary": "Mock democratic voting 1: All agents reached consensus on SELL action with 92% confidence.",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 9,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "SELL",
+        "sentiment": "SELL",
+        "onchain": "SELL",
+        "technical": "SELL",
+        "risk": "SELL",
+        "correlation": "SELL",
+        "strategy": "SELL",
+        "portfolio": "SELL",
+        "executor": "SELL"
+      },
+      "market_data": {
+        "BTC": 43686,
+        "ETH": 3314,
+        "SOL": 97,
+        "BNB": 376
+      }
+    },
+    {
+      "id": "decision_20250928_011802_264824",
+      "timestamp": "2025-09-27T21:50:02.264779",
+      "saved_at": "2025-09-28 01:18:02",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "SELL",
+          "confidence": 71,
+          "reasoning": "Democratic consensus 2: SELL recommendation based on multi-agent analysis",
+          "price_target": 40696,
+          "timestamp": "2025-09-27T21:50:02.264779"
+        }
+      ],
+      "consensus_action": "SELL",
+      "overall_confidence": 71,
+      "risk_assessment": "Medium",
+      "democracy_summary": "Mock democratic voting 2: All agents reached consensus on SELL action with 71% confidence.",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 9,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "SELL",
+        "sentiment": "SELL",
+        "onchain": "SELL",
+        "technical": "SELL",
+        "risk": "SELL",
+        "correlation": "SELL",
+        "strategy": "SELL",
+        "portfolio": "SELL",
+        "executor": "SELL"
+      },
+      "market_data": {
+        "BTC": 42689,
+        "ETH": 2554,
+        "SOL": 117,
+        "BNB": 381
+      }
+    },
+    {
+      "id": "decision_20250928_011802_264991",
+      "timestamp": "2025-09-27T18:59:02.264944",
+      "saved_at": "2025-09-28 01:18:02",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "SELL",
+          "confidence": 85,
+          "reasoning": "Democratic consensus 3: SELL recommendation based on multi-agent analysis",
+          "price_target": 47428,
+          "timestamp": "2025-09-27T18:59:02.264944"
+        }
+      ],
+      "consensus_action": "SELL",
+      "overall_confidence": 85,
+      "risk_assessment": "Medium",
+      "democracy_summary": "Mock democratic voting 3: All agents reached consensus on SELL action with 85% confidence.",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 9,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "SELL",
+        "sentiment": "SELL",
+        "onchain": "SELL",
+        "technical": "SELL",
+        "risk": "SELL",
+        "correlation": "SELL",
+        "strategy": "SELL",
+        "portfolio": "SELL",
+        "executor": "SELL"
+      },
+      "market_data": {
+        "BTC": 47269,
+        "ETH": 3320,
+        "SOL": 98,
+        "BNB": 377
+      }
+    },
+    {
+      "id": "decision_20250928_011802_265184",
+      "timestamp": "2025-09-27T15:27:02.265133",
+      "saved_at": "2025-09-28 01:18:02",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "BUY",
+          "confidence": 74,
+          "reasoning": "Democratic consensus 4: BUY recommendation based on multi-agent analysis",
+          "price_target": 44509,
+          "timestamp": "2025-09-27T15:27:02.265133"
+        }
+      ],
+      "consensus_action": "BUY",
+      "overall_confidence": 74,
+      "risk_assessment": "Medium",
+      "democracy_summary": "Mock democratic voting 4: All agents reached consensus on BUY action with 74% confidence.",
+      "vote_breakdown": {
+        "BUY": 9,
+        "SELL": 0,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "BUY",
+        "sentiment": "BUY",
+        "onchain": "BUY",
+        "technical": "BUY",
+        "risk": "BUY",
+        "correlation": "BUY",
+        "strategy": "BUY",
+        "portfolio": "BUY",
+        "executor": "BUY"
+      },
+      "market_data": {
+        "BTC": 46632,
+        "ETH": 2675,
+        "SOL": 92,
+        "BNB": 317
+      }
+    },
+    {
+      "id": "decision_20250928_011802_265471",
+      "timestamp": "2025-09-27T12:34:02.265361",
+      "saved_at": "2025-09-28 01:18:02",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "SELL",
+          "confidence": 78,
+          "reasoning": "Democratic consensus 5: SELL recommendation based on multi-agent analysis",
+          "price_target": 43532,
+          "timestamp": "2025-09-27T12:34:02.265361"
+        }
+      ],
+      "consensus_action": "SELL",
+      "overall_confidence": 78,
+      "risk_assessment": "High",
+      "democracy_summary": "Mock democratic voting 5: All agents reached consensus on SELL action with 78% confidence.",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 9,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "SELL",
+        "sentiment": "SELL",
+        "onchain": "SELL",
+        "technical": "SELL",
+        "risk": "SELL",
+        "correlation": "SELL",
+        "strategy": "SELL",
+        "portfolio": "SELL",
+        "executor": "SELL"
+      },
+      "market_data": {
+        "BTC": 44861,
+        "ETH": 2985,
+        "SOL": 94,
+        "BNB": 382
+      }
+    }
+  ]
+}

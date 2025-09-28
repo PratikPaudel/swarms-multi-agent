@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Vote, Menu, X } from "lucide-react";
+import { BarChart3, Vote, Menu, X, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,11 @@ const navigationItems = [
     title: "Decision Hub",
     icon: Vote,
     id: "decision-hub",
+  },
+  {
+    title: "Analysis History",
+    icon: History,
+    id: "analysis-history",
   },
 ];
 

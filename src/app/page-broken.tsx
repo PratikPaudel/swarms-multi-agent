@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SimpleSidebar } from "@/components/SimpleSidebar";
 import { CoinAnalytics } from "@/components/CoinAnalytics";
 import { DecisionHub } from "@/components/DecisionHub";
-import { Activity, Brain, TrendingUp, Shield, Target, Zap, RefreshCw, Vote } from "lucide-react";
+import { SimpleSidebar } from "@/components/SimpleSidebar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Activity, Brain, Gavel, RefreshCw, Shield, Target, TrendingUp, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface TradingDecisionResponse {
   decisions?: any[];
@@ -299,59 +299,58 @@ export default function TradingFloor() {
               <h1 className="text-2xl font-bold tracking-tight">Autonomous Trading Floor</h1>
               <p className="text-muted-foreground text-sm">AI-powered multi-agent trading system</p>
             </div>
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant={connectionStatus === "Connected" ? "default" : "destructive"}
-                  className="flex items-center gap-1"
-                >
-                  <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`} />
-                  {connectionStatus}
-                </Badge>
-                {connectionStatus !== "Connected" && (
-                  <Button size="sm" variant="outline" onClick={reconnect}>
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Reconnect
-                  </Button>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant={connectionStatus === "Connected" ? "default" : "destructive"}
+                className="flex items-center gap-1"
+              >
+                <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`} />
+                {connectionStatus}
+              </Badge>
+              {connectionStatus !== "Connected" && (
+                <Button size="sm" variant="outline" onClick={reconnect}>
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Reconnect
+                </Button>
+              )}
+              <Button size="sm" onClick={handleTriggerAnalysis} disabled={connectionStatus !== "Connected"}>
+                <Zap className="w-4 h-4 mr-1" />
+                Trigger Analysis
+              </Button>
+              <Button size="sm" onClick={handleTriggerVoting} disabled={isVoting || connectionStatus !== "Connected"} variant="outline">
+                {isVoting ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1" />
+                    Voting...
+                  </>
+                ) : (
+                  <>
+                    <Gavel className="w-4 h-4 mr-1" />
+                    Start Democracy
+                  </>
                 )}
-                <Button size="sm" onClick={handleTriggerAnalysis} disabled={connectionStatus !== "Connected"}>
-                  <Zap className="w-4 h-4 mr-1" />
-                  Trigger Analysis
-                </Button>
-                <Button size="sm" onClick={handleTriggerVoting} disabled={isVoting || connectionStatus !== "Connected"} variant="outline">
-                  {isVoting ? (
-                    <>
-                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1" />
-                      Voting...
-                    </>
-                  ) : (
-                    <>
-                      <Vote className="w-4 h-4 mr-1" />
-                      Start Democracy
-                    </>
-                  )}
-                </Button>
-              </div>
+              </Button>
             </div>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="flex-1 p-6">
-            {activeTab === "coin-analytics" && (
-              <CoinAnalytics
-                agents={agents}
-                votingResults={votingResults}
-                onTriggerVoting={handleTriggerVoting}
-                isVoting={isVoting}
-              />
-            )}
-            {activeTab === "decision-hub" && (
-              <DecisionHub
-                agents={agents}
-                decisions={tradingDecisions}
-                votingResults={votingResults}
-              />
-            )}
-          </div>
+        {/* Main Content */}
+        <div className="flex-1 p-6">
+          {activeTab === "coin-analytics" && (
+            <CoinAnalytics
+              agents={agents}
+              votingResults={votingResults}
+              onTriggerVoting={handleTriggerVoting}
+              isVoting={isVoting}
+            />
+          )}
+          {activeTab === "decision-hub" && (
+            <DecisionHub
+              agents={agents}
+              decisions={tradingDecisions}
+              votingResults={votingResults}
+            />
+          )}
         </div>
       </div>
     </div>

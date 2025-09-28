@@ -1,0 +1,159 @@
+{
+  "analysis_results": [
+    {
+      "id": "analysis_20250928_011802_263594",
+      "timestamp": "2025-09-28T00:34:02.263075",
+      "saved_at": "2025-09-28 01:18:02",
+      "analysis_type": "intelligence_and_analysis",
+      "market_data": {
+        "BTC": 41125,
+        "ETH": 3351,
+        "SOL": 117,
+        "BNB": 345
+      },
+      "intelligence_results": "Mock intelligence analysis 1: Market showing bearish sentiment. Trading volume decreased by 24% in the last 24 hours.",
+      "analysis_results": "Mock technical analysis 1: RSI at 51, MACD positive, Resistance level identified at $41859.",
+      "tiers_completed": [
+        "tier1_intelligence",
+        "tier2_analysis"
+      ],
+      "agents_involved": {
+        "tier1": [
+          "market_data",
+          "sentiment",
+          "onchain"
+        ],
+        "tier2": [
+          "technical",
+          "risk",
+          "correlation"
+        ]
+      },
+      "status": "analysis_complete"
+    },
+    {
+      "id": "analysis_20250928_011802_263872",
+      "timestamp": "2025-09-27T22:22:02.263811",
+      "saved_at": "2025-09-28 01:18:02",
+      "analysis_type": "intelligence_and_analysis",
+      "market_data": {
+        "BTC": 49464,
+        "ETH": 3279,
+        "SOL": 94,
+        "BNB": 321
+      },
+      "intelligence_results": "Mock intelligence analysis 2: Market showing bearish sentiment. Trading volume increased by 21% in the last 24 hours.",
+      "analysis_results": "Mock technical analysis 2: RSI at 32, MACD negative, Resistance level identified at $43268.",
+      "tiers_completed": [
+        "tier1_intelligence",
+        "tier2_analysis"
+      ],
+      "agents_involved": {
+        "tier1": [
+          "market_data",
+          "sentiment",
+          "onchain"
+        ],
+        "tier2": [
+          "technical",
+          "risk",
+          "correlation"
+        ]
+      },
+      "status": "analysis_complete"
+    },
+    {
+      "id": "analysis_20250928_011802_264058",
+      "timestamp": "2025-09-27T20:35:02.264008",
+      "saved_at": "2025-09-28 01:18:02",
+      "analysis_type": "intelligence_and_analysis",
+      "market_data": {
+        "BTC": 49713,
+        "ETH": 3398,
+        "SOL": 94,
+        "BNB": 365
+      },
+      "intelligence_results": "Mock intelligence analysis 3: Market showing bullish sentiment. Trading volume increased by 10% in the last 24 hours.",
+      "analysis_results": "Mock technical analysis 3: RSI at 33, MACD negative, Resistance level identified at $46024.",
+      "tiers_completed": [
+        "tier1_intelligence",
+        "tier2_analysis"
+      ],
+      "agents_involved": {
+        "tier1": [
+          "market_data",
+          "sentiment",
+          "onchain"
+        ],
+        "tier2": [
+          "technical",
+          "risk",
+          "correlation"
+        ]
+      },
+      "status": "analysis_complete"
+    },
+    {
+      "id": "analysis_20250928_011802_264245",
+      "timestamp": "2025-09-27T19:16:02.264195",
+      "saved_at": "2025-09-28 01:18:02",
+      "analysis_type": "intelligence_and_analysis",
+      "market_data": {
+        "BTC": 47178,
+        "ETH": 2533,
+        "SOL": 101,
+        "BNB": 333
+      },
+      "intelligence_results": "Mock intelligence analysis 4: Market showing bullish sentiment. Trading volume decreased by 20% in the last 24 hours.",
+      "analysis_results": "Mock technical analysis 4: RSI at 41, MACD negative, Resistance level identified at $44896.",
+      "tiers_completed": [
+        "tier1_intelligence",
+        "tier2_analysis"
+      ],
+      "agents_involved": {
+        "tier1": [
+          "market_data",
+          "sentiment",
+          "onchain"
+        ],
+        "tier2": [
+          "technical",
+          "risk",
+          "correlation"
+        ]
+      },
+      "status": "analysis_complete"
+    },
+    {
+      "id": "analysis_20250928_011802_264439",
+      "timestamp": "2025-09-27T17:11:02.264389",
+      "saved_at": "2025-09-28 01:18:02",
+      "analysis_type": "intelligence_and_analysis",
+      "market_data": {
+        "BTC": 44666,
+        "ETH": 2839,
+        "SOL": 92,
+        "BNB": 363
+      },
+      "intelligence_results": "Mock intelligence analysis 5: Market showing bearish sentiment. Trading volume increased by 8% in the last 24 hours.",
+      "analysis_results": "Mock technical analysis 5: RSI at 52, MACD positive, Support level identified at $41167.",
+      "tiers_completed": [
+        "tier1_intelligence",
+        "tier2_analysis"
+      ],
+      "agents_involved": {
+        "tier1": [
+          "market_data",
+          "sentiment",
+          "onchain"
+        ],
+        "tier2": [
+          "technical",
+          "risk",
+          "correlation"
+        ]
+      },
+      "status": "analysis_complete"
+    }
+  ]
+}

@@ -201,7 +201,7 @@ export function ImprovedDecisionHub({ agents, decisions, votingResults }: Improv
                         <span className="text-sm">{agent.name.split(' ')[0]}</span>
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${agent.status === 'active' ? 'bg-green-500' :
-                              agent.status === 'processing' ? 'bg-yellow-500' : 'bg-gray-500'
+                            agent.status === 'processing' ? 'bg-yellow-500' : 'bg-gray-500'
                             }`} />
                           <span className="text-sm font-medium">{agent.confidence}%</span>
                         </div>

@@ -1,12 +1,13 @@
 "use client";
 
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 import { DecisionTheater } from "@/components/DecisionTheater";
 import { ModernCoinAnalytics } from "@/components/ModernCoinAnalytics";
 import { ModernDecisionHub } from "@/components/ModernDecisionHub";
 import { SimpleSidebar } from "@/components/SimpleSidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Brain, RefreshCw, Shield, Target, TrendingUp, Vote, Zap } from "lucide-react";
+import { Activity, Brain, Gavel, RefreshCw, Shield, Target, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface TradingDecisionResponse {
@@ -111,10 +112,25 @@ export default function TradingFloor() {
     }
   };
 
+  const fetchAnalysisHistory = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/analysis/history?limit=10');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.analysis_results && data.analysis_results.length > 0) {
+          setAnalysisHistory(data.analysis_results);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch analysis history:', error);
+    }
+  };
+
   const [tradingDecisions, setTradingDecisions] = useState([
     { timestamp: "Connecting...", asset: "...", action: "...", confidence: 0, reasoning: "Loading recent trading decisions from backend..." },
   ]);
 
+  const [analysisHistory, setAnalysisHistory] = useState<any[]>([]);
   const [votingResults, setVotingResults] = useState<any>(null);
   const [isVoting, setIsVoting] = useState(false);
   const [showDecisionTheater, setShowDecisionTheater] = useState(false);
@@ -137,57 +153,79 @@ export default function TradingFloor() {
   useEffect(() => {
     fetchAgentData();
     fetchTradingDecisions();
+    fetchAnalysisHistory();
 
     const agentInterval = setInterval(fetchAgentData, 5000);
     const decisionsInterval = setInterval(fetchTradingDecisions, 10000);
+    const analysisInterval = setInterval(fetchAnalysisHistory, 15000);
 
     return () => {
       clearInterval(agentInterval);
       clearInterval(decisionsInterval);
+      clearInterval(analysisInterval);
     };
   }, []);
 
+
+
+  const handleTriggerVoting = () => {
+    setShowDecisionTheater(true);
+  };
+
   const handleTriggerAnalysis = async () => {
     try {
-      const response = await fetch('http://localhost:8000/market/current');
-      let currentMarketData;
+      // Get current market prices like we do for voting
+      let marketData;
+      try {
+        const priceResponse = await fetch('http://localhost:8000/market/current');
+        const priceData = await priceResponse.json();
 
-      if (response.ok) {
-        const data = await response.json();
-        currentMarketData = {
-          ...data.prices,
-          BNB: data.prices.BNB,
-          trigger: "manual",
-          timestamp: new Date().toISOString()
-        };
-      } else {
-        currentMarketData = {
+        if (priceData.prices) {
+          marketData = {
+            ...priceData.prices,
+            symbol: 'BTC/USDT',
+            timestamp: new Date().toISOString(),
+            trigger: 'manual_analysis_with_real_prices'
+          };
+        } else {
+          throw new Error('Price fetch failed');
+        }
+      } catch (priceError) {
+        marketData = {
           BTC: 43000,
           ETH: 2900,
           SOL: 99,
           BNB: 310,
-          trigger: "manual_fallback",
-          timestamp: new Date().toISOString()
+          symbol: 'BTC/USDT',
+          timestamp: new Date().toISOString(),
+          trigger: 'manual_analysis_fallback'
         };
       }
 
-      triggerMarketAnalysis(currentMarketData);
-    } catch (error) {
-      console.error('Error fetching current prices for analysis:', error);
-      const fallbackData = {
-        BTC: 43000,
-        ETH: 2900,
-        SOL: 99,
-        BNB: 310,
-        trigger: "manual_error_fallback",
-        timestamp: new Date().toISOString()
-      };
-      triggerMarketAnalysis(fallbackData);
-    }
-  };
+      const response = await fetch('http://localhost:8000/trading/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          market_data: marketData,
+          timestamp: new Date().toISOString()
+        })
+      });
 
-  const handleTriggerVoting = () => {
-    setShowDecisionTheater(true);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Analysis results:', data);
+        // Refresh analysis history after successful analysis
+        setTimeout(() => {
+          fetchAnalysisHistory();
+        }, 1000);
+      } else {
+        console.error('Analysis failed:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error triggering analysis:', error);
+    }
   };
 
   const handleDecisionTheaterVoting = async (onVotingComplete: (results: any) => void) => {
@@ -276,8 +314,8 @@ export default function TradingFloor() {
               <Badge
                 variant="outline"
                 className={`border-0 font-medium ${connectionStatus === "Connected"
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-red-500/20 text-red-400"
                   } flex items-center gap-2`}
               >
                 <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-400" : "bg-red-400"}`} />
@@ -310,7 +348,7 @@ export default function TradingFloor() {
                 variant="outline"
                 className="bg-[#1a1a1a] border-[#2a2a2a] text-white hover:bg-[#2a2a2a]"
               >
-                <Vote className="w-4 h-4 mr-2" />
+                <Gavel className="w-4 h-4 mr-2" />
                 Start Democracy
               </Button>
             </div>
@@ -328,6 +366,12 @@ export default function TradingFloor() {
               votingResults={votingResults}
             />
           )}
+
+          {activeTab === "analysis-history" && (
+            <AnalysisHistory
+              analysisHistory={analysisHistory}
+            />
+          )}
         </div>
 
         {/* Decision Theater Modal */}
@@ -339,6 +383,7 @@ export default function TradingFloor() {
               handleDecisionTheaterVoting(resolve);
             });
           }}
+          onTriggerAnalysis={handleTriggerAnalysis}
           onConsensus={(results) => {
             try {
               setVotingResults(results);

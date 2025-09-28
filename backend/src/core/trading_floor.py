@@ -13,6 +13,7 @@ import os
 from agents.tier1 import MarketDataAgent, SentimentAgent, OnChainAgent
 from agents.tier2 import TechnicalAnalystAgent, RiskCalculatorAgent, CorrelationAgent
 from agents.tier3 import StrategyAgent, PortfolioAgent, ExecutorAgent
+from services.json_storage import json_storage
 
 logger = logging.getLogger(__name__)
 
@@ -327,6 +328,70 @@ CONFIDENCE: [0-100]"""
                 "status": "failed"
             }
 
+    async def execute_analysis_cycle(self, market_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute analysis-only cycle using Tier 1 + Tier 2 agents (no voting)"""
+        try:
+            logger.info("Executing analysis-only cycle...")
+
+            # Fetch real market data using Market Data Agent
+            if "market_data" in self.tier1_agents:
+                try:
+                    real_market_data = await self.tier1_agents["market_data"].fetch_market_data()
+                    # Merge with provided data, preferring real data
+                    combined_data = {**market_data, **real_market_data}
+                    self.last_market_data = combined_data
+                    logger.info(f"Using real market data for analysis: {real_market_data}")
+                except Exception as e:
+                    logger.warning(f"Failed to fetch real market data: {e}, using provided data")
+                    self.last_market_data = market_data
+            else:
+                self.last_market_data = market_data
+
+            # Phase 1: Intelligence Gathering (Tier 1)
+            intelligence_task = f"Analyze current market data: {json.dumps(self.last_market_data)}"
+            intelligence_results = await self._run_workflow_async(
+                self.intelligence_workflow, intelligence_task
+            )
+
+            # Phase 2: Analysis & Processing (Tier 2)
+            analysis_task = f"Process intelligence data: {intelligence_results}"
+            analysis_results = await self._run_workflow_async(
+                self.analysis_workflow, analysis_task
+            )
+
+            # Prepare analysis results
+            analysis_data = {
+                "analysis_type": "intelligence_and_analysis",
+                "market_data": self.last_market_data,
+                "intelligence_results": intelligence_results,
+                "analysis_results": analysis_results,
+                "tiers_completed": ["tier1_intelligence", "tier2_analysis"],
+                "agents_involved": {
+                    "tier1": list(self.tier1_agents.keys()),
+                    "tier2": list(self.tier2_agents.keys())
+                },
+                "timestamp": datetime.utcnow().isoformat(),
+                "status": "analysis_complete"
+            }
+
+            # Save to JSON storage
+            try:
+                json_storage.save_analysis_result(analysis_data)
+                logger.info("Analysis result saved to JSON storage")
+            except Exception as e:
+                logger.error(f"Failed to save analysis result: {e}")
+
+            return analysis_data
+
+        except Exception as e:
+            logger.error(f"Error in analysis cycle: {e}")
+            return {
+                "error": str(e),
+                "timestamp": datetime.utcnow().isoformat(),
+                "status": "failed",
+                "analysis_type": "intelligence_and_analysis"
+            }
+
     async def _run_workflow_async(self, workflow, task: str) -> str:
         """Run workflow asynchronously"""
         try:
@@ -424,7 +489,8 @@ CONFIDENCE: [0-100]"""
             # Keep only last 15 decisions
             self.recent_decisions = self.recent_decisions[-15:]
 
-            return {
+            # Prepare trading decision data
+            trading_decision = {
                 "decisions": decisions,
                 "consensus_action": consensus_action,
                 "overall_confidence": confidence,
@@ -434,8 +500,18 @@ CONFIDENCE: [0-100]"""
                 "timestamp": datetime.utcnow().isoformat(),
                 "agent_votes": {
                     agent_id: consensus_action for agent_id in self.agents.keys()
-                }
+                },
+                "market_data": self.last_market_data
             }
+
+            # Save to JSON storage
+            try:
+                json_storage.save_trading_decision(trading_decision)
+                logger.info("Trading decision saved to JSON storage")
+            except Exception as e:
+                logger.error(f"Failed to save trading decision: {e}")
+
+            return trading_decision
 
         except Exception as e:
             logger.error(f"Error parsing voting results: {e}")

@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from core.trading_floor import AutonomousTradingFloor
 from core.websocket_manager import ConnectionManager
 from models.schemas import AgentStatusResponse, TradingDecisionResponse, MarketDataRequest
+from services.json_storage import json_storage
 
 # Load environment variables
 load_dotenv()
@@ -90,6 +91,33 @@ async def get_agents_status() -> AgentStatusResponse:
         logger.error(f"Error getting agent status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/trading/analyze")
+async def analyze_market_conditions(request: MarketDataRequest):
+    """Analyze market conditions using Tier 1 + Tier 2 agents only (no voting)"""
+    try:
+        if not trading_floor:
+            raise HTTPException(status_code=503, detail="Trading floor not initialized")
+
+        # Execute analysis-only cycle (Tier 1 + Tier 2, no voting)
+        analysis = await trading_floor.execute_analysis_cycle(request.market_data)
+
+        # Broadcast to connected clients
+        await manager.broadcast({
+            "type": "market_analysis",
+            "data": analysis,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+
+        return {
+            "analysis": analysis,
+            "timestamp": datetime.utcnow().isoformat(),
+            "analysis_type": "intelligence_and_analysis"
+        }
+
+    except Exception as e:
+        logger.error(f"Error executing analysis cycle: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/trading/execute")
 async def execute_trading_cycle(request: MarketDataRequest) -> TradingDecisionResponse:
     """Execute a trading cycle with market data"""
@@ -130,6 +158,86 @@ async def get_trading_decisions():
         }
     except Exception as e:
         logger.error(f"Error getting trading decisions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/analysis/history")
+async def get_analysis_history(limit: int = 20):
+    """Get previous analysis results from JSON storage"""
+    try:
+        analysis_results = json_storage.get_analysis_results(limit=limit)
+
+        return {
+            "analysis_results": analysis_results,
+            "total_count": len(analysis_results),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting analysis history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/trading/history")
+async def get_trading_history(limit: int = 20):
+    """Get previous trading decisions from JSON storage"""
+    try:
+        trading_decisions = json_storage.get_trading_decisions(limit=limit)
+
+        return {
+            "trading_decisions": trading_decisions,
+            "total_count": len(trading_decisions),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting trading history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/analysis/{analysis_id}")
+async def get_analysis_by_id(analysis_id: str):
+    """Get specific analysis result by ID"""
+    try:
+        analysis_result = json_storage.get_analysis_by_id(analysis_id)
+
+        if not analysis_result:
+            raise HTTPException(status_code=404, detail=f"Analysis {analysis_id} not found")
+
+        return {
+            "analysis_result": analysis_result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting analysis {analysis_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/storage/stats")
+async def get_storage_stats():
+    """Get storage statistics"""
+    try:
+        stats = json_storage.get_stats()
+
+        return {
+            "storage_stats": stats,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting storage stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/storage/init-mock-data")
+async def initialize_mock_data():
+    """Initialize storage with mock data for testing"""
+    try:
+        from utils.init_mock_data import initialize_mock_data as init_mock
+
+        result = init_mock()
+
+        return {
+            "message": "Mock data initialized successfully",
+            "data": result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error initializing mock data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/market/historical")
