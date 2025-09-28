@@ -1,26 +1,25 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Brain, Clock, Minus, Target, TrendingDown, TrendingUp } from "lucide-react";
+import { DetailedAnalysisModal } from "@/components/DetailedAnalysisModal";
+import { Activity, Brain, Clock, Eye, Minus, Target, TrendingDown, TrendingUp } from "lucide-react";
+import { useState } from "react";
 
 interface AnalysisResult {
   id: string;
   timestamp: string;
   saved_at: string;
   analysis_type: string;
-  market_data: {
-    BTC: number;
-    ETH: number;
-    SOL: number;
-    BNB: number;
-  };
-  intelligence_results: string;
-  analysis_results: string;
+  market_data: any;
+  intelligence_results: any;
+  analysis_results: any;
   tiers_completed: string[];
   agents_involved: {
     tier1: string[];
     tier2: string[];
+    tier3?: string[];
   };
   status: string;
 }
@@ -30,6 +29,9 @@ interface AnalysisHistoryProps {
 }
 
 export function AnalysisHistory({ analysisHistory }: AnalysisHistoryProps) {
+  const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisResult | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -132,6 +134,17 @@ export function AnalysisHistory({ analysisHistory }: AnalysisHistoryProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelectedAnalysis(analysis);
+                          setIsModalOpen(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Details
+                      </Button>
                       <Badge
                         variant="outline"
                         className={`border px-3 py-1 ${getTrendColor(trend)}`}
@@ -158,17 +171,40 @@ export function AnalysisHistory({ analysisHistory }: AnalysisHistoryProps) {
                       Market Snapshot
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                      {Object.entries(analysis.market_data).map(([symbol, price]) => (
-                        <div
-                          key={symbol}
-                          className="bg-[#1a1a1a] rounded-xl p-5 md:p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-colors"
-                        >
-                          <div className="text-xs text-[#a0a0a0] mb-2 font-medium">{symbol}</div>
-                          <div className="text-2xl font-bold text-white">
-                            {formatPrice(price as number)}
-                          </div>
-                        </div>
-                      ))}
+                      {Object.entries(analysis.market_data).map(([symbol, data]) => {
+                        // Handle both simple number prices and complex price objects
+                        if (typeof data === 'number') {
+                          return (
+                            <div
+                              key={symbol}
+                              className="bg-[#1a1a1a] rounded-xl p-5 md:p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-colors"
+                            >
+                              <div className="text-xs text-[#a0a0a0] mb-2 font-medium">{symbol}</div>
+                              <div className="text-2xl font-bold text-white">
+                                {formatPrice(data)}
+                              </div>
+                            </div>
+                          );
+                        } else if (typeof data === 'object' && data !== null && data.price) {
+                          return (
+                            <div
+                              key={symbol}
+                              className="bg-[#1a1a1a] rounded-xl p-5 md:p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-colors"
+                            >
+                              <div className="text-xs text-[#a0a0a0] mb-2 font-medium">{symbol}</div>
+                              <div className="text-2xl font-bold text-white">
+                                {formatPrice(data.price)}
+                              </div>
+                              {data.change_24h && (
+                                <div className={`text-xs mt-1 ${data.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                  {data.change_24h >= 0 ? '+' : ''}{(data.change_24h * 100).toFixed(2)}%
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }).filter(Boolean)}
                     </div>
                   </div>
 
@@ -181,8 +217,12 @@ export function AnalysisHistory({ analysisHistory }: AnalysisHistoryProps) {
                         Intelligence (Tier 1)
                       </h4>
                       <div className="text-sm text-[#e0e0e0] bg-[#1a1a1a] rounded-lg p-5 border border-[#3a3a3a] leading-relaxed">
-                        {analysis.intelligence_results?.slice(0, 250)}
-                        {analysis.intelligence_results?.length > 250 && "..."}
+                        {typeof analysis.intelligence_results === 'string'
+                          ? `${analysis.intelligence_results.slice(0, 250)}${analysis.intelligence_results.length > 250 ? '...' : ''}`
+                          : Array.isArray(analysis.intelligence_results)
+                          ? `${analysis.intelligence_results.length} agent reports available`
+                          : 'Processing intelligence data...'
+                        }
                       </div>
                     </div>
 
@@ -193,8 +233,12 @@ export function AnalysisHistory({ analysisHistory }: AnalysisHistoryProps) {
                         Technical Analysis (Tier 2)
                       </h4>
                       <div className="text-sm text-[#e0e0e0] bg-[#1a1a1a] rounded-lg p-5 border border-[#3a3a3a] leading-relaxed">
-                        {analysis.analysis_results?.slice(0, 250)}
-                        {analysis.analysis_results?.length > 250 && "..."}
+                        {typeof analysis.analysis_results === 'string'
+                          ? `${analysis.analysis_results.slice(0, 250)}${analysis.analysis_results.length > 250 ? '...' : ''}`
+                          : Array.isArray(analysis.analysis_results)
+                          ? `${analysis.analysis_results.length} agent reports available`
+                          : 'Processing analysis data...'
+                        }
                       </div>
                     </div>
                   </div>
@@ -242,6 +286,16 @@ export function AnalysisHistory({ analysisHistory }: AnalysisHistoryProps) {
           })}
         </div>
       </div>
+
+      {/* Detailed Analysis Modal */}
+      <DetailedAnalysisModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedAnalysis(null);
+        }}
+        analysis={selectedAnalysis}
+      />
     </div>
   );
 }

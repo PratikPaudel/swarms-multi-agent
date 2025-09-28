@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Brain, TrendingUp, Shield, Target, Zap, Vote, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Vote } from "lucide-react";
+import { useEffect, useState } from 'react';
 
 interface Agent {
   id: string;
@@ -82,7 +81,7 @@ export default function NodeGraph({ agents, votingResults, onTriggerVoting, isVo
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Democratic Trading Floor</h1>
+          <h1 className="text-3xl font-bold text-white">Consensus Trading Floor</h1>
           <p className="text-gray-400">AI-Powered Multi-Agent Voting System</p>
         </div>
 
@@ -119,7 +118,7 @@ export default function NodeGraph({ agents, votingResults, onTriggerVoting, isVo
             ) : (
               <>
                 <Vote className="w-4 h-4 mr-2" />
-                Start Democracy
+                Start Consensus
               </>
             )}
           </Button>
@@ -186,7 +185,7 @@ export default function NodeGraph({ agents, votingResults, onTriggerVoting, isVo
         <div className="space-y-4">
           <h3 className="text-xl font-semibold text-white flex items-center gap-2">
             <Vote className="w-5 h-5 text-yellow-500" />
-            Democratic Consensus
+            Consensus
           </h3>
 
           {votingResults && (
@@ -226,7 +225,7 @@ export default function NodeGraph({ agents, votingResults, onTriggerVoting, isVo
                 </CardHeader>
                 <CardContent>
                   <div className="text-gray-300 text-sm">
-                    {votingResults.democracy_summary || "Awaiting democratic analysis..."}
+                    {votingResults.democracy_summary || votingResults.consensus_summary || "Awaiting consensus analysis..."}
                   </div>
                 </CardContent>
               </Card>
@@ -277,9 +276,8 @@ function AgentNode({ agent, tier, vote, isVoting, delay }: AgentNodeProps) {
   };
 
   return (
-    <Card className={`bg-gray-800 border-gray-700 transition-all duration-300 hover:scale-105 ${
-      isAnimating ? 'ring-2 ring-blue-500 animate-pulse' : ''
-    }`}>
+    <Card className={`bg-gray-800 border-gray-700 transition-all duration-300 hover:scale-105 ${isAnimating ? 'ring-2 ring-blue-500 animate-pulse' : ''
+      }`}>
       <CardContent className="p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className={`p-2 rounded-lg bg-gradient-to-r ${getTierColor(tier)}`}>

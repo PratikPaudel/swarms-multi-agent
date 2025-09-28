@@ -22,6 +22,7 @@ interface TradingDecisionResponse {
     overall_confidence?: number;
     agent_votes?: Record<string, string>;
     democracy_summary?: string;
+    consensus_summary?: string;
   };
 }
 
@@ -272,11 +273,12 @@ export default function TradingFloor() {
 
       if (response.ok) {
         const data: TradingDecisionResponse = await response.json();
-        const votingData = {
+        const votingData: any = {
           consensus_action: data.consensus_action,
           overall_confidence: data.overall_confidence,
           agent_votes: data.agent_votes,
-          democracy_summary: data.risk_assessment
+          democracy_summary: (data as any).democracy_summary || data.risk_assessment,
+          consensus_summary: (data as any).consensus_summary
         };
 
         setVotingResults(votingData);
@@ -287,7 +289,7 @@ export default function TradingFloor() {
             asset: 'BTC',
             action: votingData.consensus_action,
             confidence: Math.round(votingData.overall_confidence || 0),
-            reasoning: votingData.democracy_summary || 'Democratic consensus reached'
+            reasoning: votingData.consensus_summary || votingData.democracy_summary || 'Consensus reached'
           };
           setTradingDecisions(prev => [newDecision, ...prev.slice(0, 4)]);
         }
@@ -352,7 +354,7 @@ export default function TradingFloor() {
                 className="bg-[#1a1a1a] border-[#2a2a2a] text-white hover:bg-[#2a2a2a]"
               >
                 <Gavel className="w-4 h-4 mr-2" />
-                Start Democracy
+                Start Consensus
               </Button>
             </div>
           </div>
@@ -396,7 +398,7 @@ export default function TradingFloor() {
                   asset: 'BTC',
                   action: results.consensus_action,
                   confidence: Math.round(results.overall_confidence || 0),
-                  reasoning: results.democracy_summary || 'Democratic consensus reached'
+                  reasoning: (results as any).consensus_summary || results.democracy_summary || 'Consensus reached'
                 };
                 setTradingDecisions(prev => [newDecision, ...prev.slice(0, 4)]);
               }

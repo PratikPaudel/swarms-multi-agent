@@ -51,7 +51,7 @@ export function ImprovedDecisionHub({ agents, decisions, votingResults }: Improv
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="w-5 h-5" />
-              Latest Democratic Decision
+              Latest Consensus Decision
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -83,7 +83,7 @@ export function ImprovedDecisionHub({ agents, decisions, votingResults }: Improv
               <div className="text-center p-8 text-muted-foreground">
                 <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No voting results yet.</p>
-                <p className="text-sm">Trigger democracy to see consensus decisions.</p>
+                <p className="text-sm">Trigger consensus to see decisions.</p>
               </div>
             )}
           </CardContent>

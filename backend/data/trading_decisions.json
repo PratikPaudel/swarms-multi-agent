@@ -204,6 +204,468 @@
         "SOL": 94,
         "BNB": 382
       }
+    },
+    {
+      "id": "decision_20250928_020531_835680",
+      "timestamp": "2025-09-28T02:05:31.835325",
+      "saved_at": "2025-09-28 02:05:31",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "BUY",
+          "confidence": 70,
+          "reasoning": "Democratic vote: Democratic vote completed...",
+          "price_target": 114876.3,
+          "timestamp": "2025-09-28T02:05:31.835290"
+        },
+        {
+          "asset": "ETH",
+          "action": "BUY",
+          "confidence": 70,
+          "reasoning": "Democratic vote: Democratic vote completed...",
+          "price_target": 4200.8715,
+          "timestamp": "2025-09-28T02:05:31.835310"
+        },
+        {
+          "asset": "SOL",
+          "action": "BUY",
+          "confidence": 70,
+          "reasoning": "Democratic vote: Democratic vote completed...",
+          "price_target": 211.47000000000003,
+          "timestamp": "2025-09-28T02:05:31.835317"
+        }
+      ],
+      "consensus_action": "BUY",
+      "overall_confidence": 70,
+      "risk_assessment": "Medium",
+      "democracy_summary": "{'role': 'user', 'content': 'Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).\\n\\nMarket Data: {\"BTC\": {\"price\": 109406, \"volume_24h\": 23346571495.679462, \"change_24h\": -0.11110157560294592, \"market_cap\": 2179903348260.5, \"timest...",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 0,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "BUY",
+        "sentiment": "BUY",
+        "onchain": "BUY",
+        "technical": "BUY",
+        "risk": "BUY",
+        "correlation": "BUY",
+        "strategy": "BUY",
+        "portfolio": "BUY",
+        "executor": "BUY"
+      },
+      "market_data": {
+        "BTC": {
+          "price": 109406,
+          "volume_24h": 23346571495.679462,
+          "change_24h": -0.11110157560294592,
+          "market_cap": 2179903348260.5,
+          "timestamp": "2025-09-28T02:04:48.779209"
+        },
+        "ETH": {
+          "price": 4000.83,
+          "volume_24h": 16876386230.710524,
+          "change_24h": -0.44193806088863374,
+          "market_cap": 482937124475.2007,
+          "timestamp": "2025-09-28T02:04:48.779221"
+        },
+        "SOL": {
+          "price": 201.4,
+          "volume_24h": 3921836673.256437,
+          "change_24h": -1.5227040116536206,
+          "market_cap": 109391909042.07913,
+          "timestamp": "2025-09-28T02:04:48.779224"
+        },
+        "BNB": 967.86,
+        "symbol": "BTC/USDT",
+        "timestamp": "2025-09-28T02:04:48.630Z",
+        "trigger": "manual_voting_with_real_prices",
+        "ADA": {
+          "price": 0.773127,
+          "volume_24h": 846302031.3557756,
+          "change_24h": -2.207066442237007,
+          "market_cap": 28239823986.821835,
+          "timestamp": "2025-09-28T02:04:48.779227"
+        },
+        "DOT": {
+          "price": 3.84,
+          "volume_24h": 141570256.82914284,
+          "change_24h": -1.889714887720947,
+          "market_cap": 5837466084.998366,
+          "timestamp": "2025-09-28T02:04:48.779229"
+        },
+        "macro_context": {
+          "fed_funds_rate": {
+            "value": 5.25,
+            "date": "2025-09-27T19:04:48.779235"
+          },
+          "inflation_rate": {
+            "value": 3.2,
+            "date": "2025-09-27T19:04:48.779242"
+          },
+          "unemployment_rate": {
+            "value": 3.8,
+            "date": "2025-09-27T19:04:48.779244"
+          },
+          "gdp_growth": {
+            "value": 2.1,
+            "date": "2025-09-27T19:04:48.779245"
+          },
+          "dollar_index": {
+            "value": 104.5,
+            "date": "2025-09-27T19:04:48.779246"
+          }
+        },
+        "data_source": "CoinGecko + FRED APIs"
+      }
+    },
+    {
+      "id": "decision_20250928_024659_632536",
+      "timestamp": "2025-09-28T02:46:59.631523",
+      "saved_at": "2025-09-28 02:46:59",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "BUY",
+          "confidence": 70,
+          "reasoning": "Democratic vote: Democratic vote completed...",
+          "price_target": 114962.40000000001,
+          "timestamp": "2025-09-28T02:46:59.631473"
+        },
+        {
+          "asset": "ETH",
+          "action": "BUY",
+          "confidence": 70,
+          "reasoning": "Democratic vote: Democratic vote completed...",
+          "price_target": 4204.431,
+          "timestamp": "2025-09-28T02:46:59.631505"
+        },
+        {
+          "asset": "SOL",
+          "action": "BUY",
+          "confidence": 70,
+          "reasoning": "Democratic vote: Democratic vote completed...",
+          "price_target": 211.7955,
+          "timestamp": "2025-09-28T02:46:59.631514"
+        }
+      ],
+      "consensus_action": "BUY",
+      "overall_confidence": 70,
+      "risk_assessment": "Medium",
+      "democracy_summary": "{'role': 'user', 'content': 'Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).\\n\\nMarket Data: {\"BTC\": {\"price\": 109488, \"volume_24h\": 23614112188.46466, \"change_24h\": 0.0070067629158378966, \"market_cap\": 2182410304183.5566, \"tim...",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 0,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "BUY",
+        "sentiment": "BUY",
+        "onchain": "BUY",
+        "technical": "BUY",
+        "risk": "BUY",
+        "correlation": "BUY",
+        "strategy": "BUY",
+        "portfolio": "BUY",
+        "executor": "BUY"
+      },
+      "market_data": {
+        "BTC": {
+          "price": 109488,
+          "volume_24h": 23614112188.46466,
+          "change_24h": 0.0070067629158378966,
+          "market_cap": 2182410304183.5566,
+          "timestamp": "2025-09-28T02:45:35.562431"
+        },
+        "ETH": {
+          "price": 4004.22,
+          "volume_24h": 16746108314.496746,
+          "change_24h": -0.3584868090843177,
+          "market_cap": 483582466882.62396,
+          "timestamp": "2025-09-28T02:45:35.562442"
+        },
+        "SOL": {
+          "price": 201.71,
+          "volume_24h": 3921562700.0425367,
+          "change_24h": -1.293138529003584,
+          "market_cap": 109766560279.71126,
+          "timestamp": "2025-09-28T02:45:35.562445"
+        },
+        "BNB": 971.64,
+        "symbol": "BTC/USDT",
+        "timestamp": "2025-09-28T02:45:35.405Z",
+        "trigger": "manual_voting_with_real_prices",
+        "ADA": {
+          "price": 0.774497,
+          "volume_24h": 862672915.5994792,
+          "change_24h": -2.1058444626467825,
+          "market_cap": 28339969664.035362,
+          "timestamp": "2025-09-28T02:45:35.562448"
+        },
+        "DOT": {
+          "price": 3.84,
+          "volume_24h": 141412843.44880626,
+          "change_24h": -1.8619336674292553,
+          "market_cap": 5848473578.50373,
+          "timestamp": "2025-09-28T02:45:35.562450"
+        },
+        "macro_context": {
+          "fed_funds_rate": {
+            "value": 5.25,
+            "date": "2025-09-27T19:45:35.562467"
+          },
+          "inflation_rate": {
+            "value": 3.2,
+            "date": "2025-09-27T19:45:35.562476"
+          },
+          "unemployment_rate": {
+            "value": 3.8,
+            "date": "2025-09-27T19:45:35.562478"
+          },
+          "gdp_growth": {
+            "value": 2.1,
+            "date": "2025-09-27T19:45:35.562479"
+          },
+          "dollar_index": {
+            "value": 104.5,
+            "date": "2025-09-27T19:45:35.562480"
+          }
+        },
+        "data_source": "CoinGecko + FRED APIs"
+      }
+    },
+    {
+      "id": "decision_20250928_030955_95945",
+      "timestamp": "2025-09-28T03:09:55.094927",
+      "saved_at": "2025-09-28 03:09:55",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "BUY",
+          "confidence": 80,
+          "reasoning": "Consensus vote: Consensus vote completed...",
+          "price_target": 114994.95000000001,
+          "timestamp": "2025-09-28T03:09:55.094840"
+        },
+        {
+          "asset": "ETH",
+          "action": "BUY",
+          "confidence": 80,
+          "reasoning": "Consensus vote: Consensus vote completed...",
+          "price_target": 4204.62,
+          "timestamp": "2025-09-28T03:09:55.094893"
+        },
+        {
+          "asset": "SOL",
+          "action": "BUY",
+          "confidence": 80,
+          "reasoning": "Consensus vote: Consensus vote completed...",
+          "price_target": 211.7535,
+          "timestamp": "2025-09-28T03:09:55.094910"
+        }
+      ],
+      "consensus_action": "BUY",
+      "overall_confidence": 80,
+      "risk_assessment": "Medium",
+      "democracy_summary": "{'role': 'user', 'content': 'Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).\\n\\nMarket Data: {\"BTC\": {\"price\": 109519, \"volume_24h\": 23313025193.285038, \"change_24h\": 0.02466722782457838, \"market_cap\": 2182652476446.8796, \"time...",
+      "consensus_summary": "{'role': 'user', 'content': 'Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).\\n\\nMarket Data: {\"BTC\": {\"price\": 109519, \"volume_24h\": 23313025193.285038, \"change_24h\": 0.02466722782457838, \"market_cap\": 2182652476446.8796, \"time...",
+      "vote_breakdown": {
+        "BUY": 0,
+        "SELL": 0,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "BUY",
+        "sentiment": "BUY",
+        "onchain": "BUY",
+        "technical": "BUY",
+        "risk": "BUY",
+        "correlation": "BUY",
+        "strategy": "BUY",
+        "portfolio": "BUY",
+        "executor": "BUY"
+      },
+      "market_data": {
+        "BTC": {
+          "price": 109519,
+          "volume_24h": 23313025193.285038,
+          "change_24h": 0.02466722782457838,
+          "market_cap": 2182652476446.8796,
+          "timestamp": "2025-09-28T03:09:22.246198"
+        },
+        "ETH": {
+          "price": 4004.4,
+          "volume_24h": 16631639910.0047,
+          "change_24h": -0.2508620160463418,
+          "market_cap": 483332148375.2638,
+          "timestamp": "2025-09-28T03:09:22.246210"
+        },
+        "SOL": {
+          "price": 201.67,
+          "volume_24h": 3844107698.315545,
+          "change_24h": -1.1793252338301567,
+          "market_cap": 109607996397.29395,
+          "timestamp": "2025-09-28T03:09:22.246214"
+        },
+        "BNB": 974.22,
+        "symbol": "BTC/USDT",
+        "timestamp": "2025-09-28T03:09:22.017Z",
+        "trigger": "manual_voting_with_real_prices",
+        "ADA": {
+          "price": 0.775542,
+          "volume_24h": 543948163.781524,
+          "change_24h": -1.928939827759701,
+          "market_cap": 28293772852.890636,
+          "timestamp": "2025-09-28T03:09:22.246216"
+        },
+        "DOT": {
+          "price": 3.84,
+          "volume_24h": 140390946.45629573,
+          "change_24h": -1.7124194316461838,
+          "market_cap": 5847098135.93636,
+          "timestamp": "2025-09-28T03:09:22.246218"
+        },
+        "macro_context": {
+          "fed_funds_rate": {
+            "value": 5.25,
+            "date": "2025-09-27T20:09:22.246228"
+          },
+          "inflation_rate": {
+            "value": 3.2,
+            "date": "2025-09-27T20:09:22.246232"
+          },
+          "unemployment_rate": {
+            "value": 3.8,
+            "date": "2025-09-27T20:09:22.246233"
+          },
+          "gdp_growth": {
+            "value": 2.1,
+            "date": "2025-09-27T20:09:22.246234"
+          },
+          "dollar_index": {
+            "value": 104.5,
+            "date": "2025-09-27T20:09:22.246235"
+          }
+        },
+        "data_source": "CoinGecko + FRED APIs"
+      }
+    },
+    {
+      "id": "decision_20250928_031850_269129",
+      "timestamp": "2025-09-28T03:18:50.267645",
+      "saved_at": "2025-09-28 03:18:50",
+      "decisions": [
+        {
+          "asset": "BTC",
+          "action": "BUY",
+          "confidence": 56,
+          "reasoning": "Consensus vote: Consensus vote completed...",
+          "price_target": 115000.20000000001,
+          "timestamp": "2025-09-28T03:18:50.267548"
+        },
+        {
+          "asset": "ETH",
+          "action": "BUY",
+          "confidence": 56,
+          "reasoning": "Consensus vote: Consensus vote completed...",
+          "price_target": 4207.77,
+          "timestamp": "2025-09-28T03:18:50.267605"
+        },
+        {
+          "asset": "SOL",
+          "action": "BUY",
+          "confidence": 56,
+          "reasoning": "Consensus vote: Consensus vote completed...",
+          "price_target": 211.9425,
+          "timestamp": "2025-09-28T03:18:50.267625"
+        }
+      ],
+      "consensus_action": "BUY",
+      "overall_confidence": 56,
+      "risk_assessment": "Medium",
+      "democracy_summary": "{'role': 'user', 'content': 'Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).\\n\\nMarket Data: {\"BTC\": {\"price\": 109524, \"volume_24h\": 23371063566.9123, \"change_24h\": 0.02096017305084646, \"market_cap\": 2182282819570.4805, \"timest...",
+      "consensus_summary": "{'role': 'user', 'content': 'Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).\\n\\nMarket Data: {\"BTC\": {\"price\": 109524, \"volume_24h\": 23371063566.9123, \"change_24h\": 0.02096017305084646, \"market_cap\": 2182282819570.4805, \"timest...",
+      "vote_breakdown": {
+        "BUY": 19,
+        "SELL": 15,
+        "HOLD": 0
+      },
+      "agent_votes": {
+        "market_data": "BUY",
+        "sentiment": "BUY",
+        "onchain": "BUY",
+        "technical": "BUY",
+        "risk": "BUY",
+        "correlation": "BUY",
+        "strategy": "BUY",
+        "portfolio": "BUY",
+        "executor": "BUY"
+      },
+      "market_data": {
+        "BTC": {
+          "price": 109524,
+          "volume_24h": 23371063566.9123,
+          "change_24h": 0.02096017305084646,
+          "market_cap": 2182282819570.4805,
+          "timestamp": "2025-09-28T03:18:22.229223"
+        },
+        "ETH": {
+          "price": 4007.4,
+          "volume_24h": 16656402296.157166,
+          "change_24h": -0.14269849971019613,
+          "market_cap": 483511724670.0867,
+          "timestamp": "2025-09-28T03:18:22.229233"
+        },
+        "SOL": {
+          "price": 201.85,
+          "volume_24h": 3821812280.11781,
+          "change_24h": -1.0054549893716176,
+          "market_cap": 109707620618.42911,
+          "timestamp": "2025-09-28T03:18:22.229236"
+        },
+        "BNB": 974.18,
+        "symbol": "BTC/USDT",
+        "timestamp": "2025-09-28T03:18:22.092Z",
+        "trigger": "manual_voting_with_real_prices",
+        "ADA": {
+          "price": 0.775683,
+          "volume_24h": 542968940.9305389,
+          "change_24h": -1.8943763729308554,
+          "market_cap": 28345074331.766636,
+          "timestamp": "2025-09-28T03:18:22.229238"
+        },
+        "DOT": {
+          "price": 3.84,
+          "volume_24h": 133482307.69935217,
+          "change_24h": -1.6951467023231728,
+          "market_cap": 5846999975.163022,
+          "timestamp": "2025-09-28T03:18:22.229240"
+        },
+        "macro_context": {
+          "fed_funds_rate": {
+            "value": 5.25,
+            "date": "2025-09-27T20:18:22.229246"
+          },
+          "inflation_rate": {
+            "value": 3.2,
+            "date": "2025-09-27T20:18:22.229249"
+          },
+          "unemployment_rate": {
+            "value": 3.8,
+            "date": "2025-09-27T20:18:22.229251"
+          },
+          "gdp_growth": {
+            "value": 2.1,
+            "date": "2025-09-27T20:18:22.229252"
+          },
+          "dollar_index": {
+            "value": 104.5,
+            "date": "2025-09-27T20:18:22.229253"
+          }
+        },
+        "data_source": "CoinGecko + FRED APIs"
+      }
     }
   ]
 }

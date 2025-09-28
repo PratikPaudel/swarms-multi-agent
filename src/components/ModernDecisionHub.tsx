@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle, TrendingUp, TrendingDown, Target, Activity, Users, Brain, Zap } from "lucide-react";
+import { Activity, Brain, Target, TrendingDown, TrendingUp, Users, Zap } from "lucide-react";
 
 interface Agent {
   id: string;
@@ -46,7 +46,7 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Decision Hub</h1>
         <p className="text-[#a0a0a0] text-lg">
-          AI-powered democratic trading decisions and system intelligence
+          AI-powered consensus trading decisions and system intelligence
         </p>
       </div>
 
@@ -116,7 +116,7 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
           <CardHeader className="pb-4">
             <CardTitle className="text-white text-xl font-bold flex items-center gap-2">
               <Zap className="w-5 h-5 text-blue-400" />
-              Latest Democratic Decision
+              Latest Consensus Decision
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -124,10 +124,9 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
               <div className="space-y-6">
                 {/* Main Decision Display */}
                 <div className="text-center p-6 bg-[#111111] rounded-xl border border-[#2a2a2a]">
-                  <div className={`text-5xl font-bold mb-3 ${
-                    votingResults.consensus_action === 'BUY' ? 'text-green-400' :
+                  <div className={`text-5xl font-bold mb-3 ${votingResults.consensus_action === 'BUY' ? 'text-green-400' :
                     votingResults.consensus_action === 'SELL' ? 'text-red-400' : 'text-yellow-400'
-                  }`}>
+                    }`}>
                     {votingResults.consensus_action}
                   </div>
                   <div className="text-white text-lg mb-2">
@@ -149,11 +148,10 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
                       {Object.entries(votingResults.agent_votes).slice(0, 9).map(([agent, vote]) => (
                         <div
                           key={agent}
-                          className={`p-2 rounded-lg text-center text-xs font-medium ${
-                            vote === votingResults.consensus_action
-                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                              : 'bg-[#111111] text-[#a0a0a0] border border-[#2a2a2a]'
-                          }`}
+                          className={`p-2 rounded-lg text-center text-xs font-medium ${vote === votingResults.consensus_action
+                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                            : 'bg-[#111111] text-[#a0a0a0] border border-[#2a2a2a]'
+                            }`}
                         >
                           <div className="capitalize">{agent.replace('_', ' ')}</div>
                           <div className="font-bold">{vote as string}</div>
@@ -167,7 +165,7 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
               <div className="text-center p-8 text-[#a0a0a0]">
                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p className="text-lg">No voting results yet</p>
-                <p className="text-sm">Trigger democracy to see consensus decisions</p>
+                <p className="text-sm">Trigger consensus to see decisions</p>
               </div>
             )}
           </CardContent>
@@ -216,10 +214,9 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
                     <div key={agent.id} className="flex items-center justify-between p-2 bg-[#111111] rounded-lg">
                       <span className="text-[#a0a0a0] text-sm">{agent.name.split(' ')[0]}</span>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          agent.status === 'active' ? 'bg-green-400' :
+                        <div className={`w-2 h-2 rounded-full ${agent.status === 'active' ? 'bg-green-400' :
                           agent.status === 'processing' ? 'bg-yellow-400' : 'bg-gray-500'
-                        }`} />
+                          }`} />
                         <span className="text-white font-medium text-sm">{agent.confidence}%</span>
                       </div>
                     </div>
@@ -244,11 +241,10 @@ export function ModernDecisionHub({ agents, decisions, votingResults }: ModernDe
                     <div className="flex items-center gap-3">
                       <Badge
                         variant="outline"
-                        className={`border-0 font-medium ${
-                          decision.action === 'BUY' ? 'bg-green-500/20 text-green-400' :
+                        className={`border-0 font-medium ${decision.action === 'BUY' ? 'bg-green-500/20 text-green-400' :
                           decision.action === 'SELL' ? 'bg-red-500/20 text-red-400' :
-                          'bg-yellow-500/20 text-yellow-400'
-                        }`}
+                            'bg-yellow-500/20 text-yellow-400'
+                          }`}
                       >
                         {decision.action}
                       </Badge>

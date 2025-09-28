@@ -6,12 +6,14 @@ The Autonomous Trading Floor is a revolutionary system that leverages a swarm of
 
 **This isn't just automation; it's augmented intelligence that learns, adapts, and delivers a quantifiable edge.**
 
-![Trading Floor Preview](https://img.shields.io/badge/Status-MVP_Complete-green)
+![Trading Floor Preview](https://img.shields.io/badge/Status-Production_Ready-brightgreen)
+![Live Demo](https://img.shields.io/badge/Demo-Live-blue)
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5-black)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-blue)
-![Swarms](https://img.shields.io/badge/Swarms-8.3.8-purple)
+![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115.4-blue)
+![Swarms](https://img.shields.io/badge/Swarms-6.7.7-purple)
 ![Claude 3 Haiku](https://img.shields.io/badge/Model-Claude_3_Haiku-orange)
+![Production](https://img.shields.io/badge/Deployed-Render-green)
 
 ---
 
@@ -21,11 +23,11 @@ In a market that never sleeps, coordination delays and emotional decisions on a 
 
 Our Autonomous Trading Floor solves this by creating a **24/7 digital trading desk** where AI agents perform deep analysis and collaborate to make objective, data-driven decisions 40% faster than traditional methods.
 
-## 🤖 Our Solution: An AI Agent Democracy
+## 🤖 Our Solution: An AI Agent Consensus
 
 We've built a multi-agent system using the cutting-edge **Swarms framework**. Nine AI agents, each powered by `Claude 3 Haiku`, form a three-tier hierarchy to replicate and enhance a professional trading desk.
 
-The system's core is a **democratic voting mechanism (`MajorityVoting`)**, where all nine agents deliberate and vote on the final trading decision. This ensures a robust consensus, balancing risk and opportunity from multiple expert perspectives.
+The system's core is a **consensus-based voting mechanism (`MajorityVoting`)**, where all nine agents deliberate and vote on the final trading decision. This ensures a robust consensus, balancing risk and opportunity from multiple expert perspectives.
 
 ### Three-Tier Agent Architecture
 
@@ -49,9 +51,17 @@ The system's core is a **democratic voting mechanism (`MajorityVoting`)**, where
 ## 🌟 Key Features & Innovations
 
 *   **100% Real Data Integration**: Decisions are fueled by live data from **CoinGecko, Yahoo Finance, Tavily, Exa, and DefiLlama**.
-*   **AI Agent Democracy**: First-of-its-kind implementation of Swarms `MajorityVoting` where 9 Claude agents debate and vote on trading decisions.
+*   **AI Agent Consensus**: First-of-its-kind implementation of Swarms `MajorityVoting` where 9 Claude agents debate and vote on trading decisions.
 *   **Complete System**: A fully integrated solution with a Next.js frontend, FastAPI backend, and a swarm of autonomous AI agents.
 *   **Transparent Reasoning**: The UI provides full visibility into the AI's decision-making process, including each agent's vote and confidence score.
+
+---
+
+## 🌐 Live Demo
+
+**Try the system now**: [https://swarms-multi-agent.onrender.com](https://swarms-multi-agent.onrender.com)
+
+Experience the autonomous trading floor in action with real AI agents making live trading decisions.
 
 ---
 
@@ -68,7 +78,7 @@ Get your own Autonomous Trading Floor running in minutes.
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/your-username/swarms-multi-agent.git
 cd swarms-multi-agent
 
 # Install frontend dependencies
@@ -109,12 +119,15 @@ The backend will be available at `http://localhost:8000`.
 
 ---
 
-## 🎯 Project Status: MVP Complete
+## 🎯 Project Status: Production Ready
 
-*   ✅ **9-Agent Democratic Floor**: Fully operational with real Claude agents and consensus voting.
-*   ✅ **100% Real Data**: All mock data has been eliminated. The system uses live market APIs.
-*   ✅ **Full Integration**: Frontend and backend are seamlessly connected.
-*   ✅ **Supported Assets**: BTC, ETH, SOL, and BNB.
+*   ✅ **9-Agent Consensus Floor**: Fully operational with real Claude agents and consensus voting
+*   ✅ **100% Real Data**: All mock data eliminated - live APIs from CoinGecko, Yahoo Finance, Tavily, Exa, DefiLlama
+*   ✅ **Production Deployment**: Live system at https://swarms-multi-agent.onrender.com
+*   ✅ **Full Integration**: Frontend ↔ Backend ↔ AI Agents seamlessly connected
+*   ✅ **Real-time Trading Decisions**: Consensus voting produces live BUY/SELL/HOLD recommendations
+*   ✅ **Supported Assets**: BTC, ETH, SOL, and BNB with real-time price feeds
+*   ✅ **Professional UI**: Trading-grade interface with live agent status and decision history
 
 ## 🛣️ What's Next
 

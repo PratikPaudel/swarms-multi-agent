@@ -299,7 +299,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
               </div>
               <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4">
                 <span>AI Decision Theater</span>
-                <span className="text-sm sm:text-base lg:text-lg font-normal text-gray-400 hidden lg:block">Multi-Agent Democracy in Action</span>
+                <span className="text-sm sm:text-base lg:text-lg font-normal text-gray-400 hidden lg:block">Multi-Agent Consensus in Action</span>
               </div>
             </DialogTitle>
             <div className="flex items-center gap-2 lg:gap-4">
@@ -315,7 +315,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
             {/* Unified Container: Process + Stream */}
             <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-6">Democratic Process</h3>
+                <h3 className="text-xl font-bold mb-6">Consensus Process</h3>
 
                 {currentPhase === 'init' && (
                   <div className="text-center py-8 lg:py-12">
@@ -324,7 +324,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
                         <Vote className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
                       </div>
                       <h4 className="text-lg lg:text-xl font-semibold mb-2">Choose Your Analysis Mode</h4>
-                      <p className="text-gray-400 text-xs lg:text-sm mb-6 lg:mb-8 px-2">Quick insights or full democratic decision making</p>
+                      <p className="text-gray-400 text-xs lg:text-sm mb-6 lg:mb-8 px-2">Quick insights or full consensus decision making</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 max-w-2xl mx-auto">
@@ -351,18 +351,18 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
                         </Button>
                       </div>
 
-                      {/* Start Democracy Button */}
+                      {/* Start Consensus Button */}
                       <div className="bg-[#2a2a2a] rounded-xl p-4 lg:p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-all">
                         <div className="mb-3 lg:mb-4">
                           <Vote className="w-8 h-8 lg:w-10 lg:h-10 text-purple-400 mx-auto mb-2" />
-                          <h5 className="font-semibold text-sm lg:text-base">Start Democracy</h5>
-                          <p className="text-xs lg:text-sm text-gray-400 mt-1">Full democratic process</p>
+                          <h5 className="font-semibold text-sm lg:text-base">Start Consensus</h5>
+                          <p className="text-xs lg:text-sm text-gray-400 mt-1">Full consensus process</p>
                         </div>
                         <ul className="text-xs text-gray-300 mb-4 space-y-1">
                           <li>• All 3 tiers (9 agents)</li>
                           <li>• 30+ seconds</li>
                           <li>• BUY/SELL/HOLD decision</li>
-                          <li>• Democratic voting</li>
+                          <li>• Consensus voting</li>
                         </ul>
                         <Button
                           onClick={handleStartDemo}
@@ -370,7 +370,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
                           size="sm"
                         >
                           <Vote className="w-4 h-4 mr-2" />
-                          Start Democracy
+                          Start Consensus
                         </Button>
                       </div>
                     </div>
@@ -452,7 +452,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
                             <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" /> :
                             <Clock className="w-5 h-5 text-gray-500" />
                         }
-                        <span>Democratic Consensus</span>
+                        <span>Consensus</span>
                       </div>
                     )}
                   </div>
@@ -481,8 +481,8 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
                   {agentThoughts.length === 0 && currentPhase === 'init' && (
                     <div className="text-center py-12 lg:py-20 text-[#a0a0a0]">
                       <Brain className="w-16 h-16 lg:w-20 lg:h-20 mx-auto mb-4 lg:mb-6 opacity-50" />
-                      <h4 className="text-lg lg:text-xl font-semibold mb-2">Waiting for Democracy</h4>
-                      <p className="text-sm lg:text-lg px-4">Start democracy to see AI agents thinking in real-time</p>
+                      <h4 className="text-lg lg:text-xl font-semibold mb-2">Waiting for Consensus</h4>
+                      <p className="text-sm lg:text-lg px-4">Start consensus to see AI agents thinking in real-time</p>
                     </div>
                   )}
 
@@ -572,9 +572,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting, onTriggerAnaly
                           <div className="text-3xl lg:text-5xl font-bold text-green-400 mb-2 lg:mb-3">
                             {consensusResult.consensus_action}
                           </div>
-                          <div className="text-lg lg:text-2xl text-white mb-1 lg:mb-2">
-                            Democratic Consensus Reached
-                          </div>
+                          <div className="text-lg lg:text-2xl text-white mb-1 lg:mb-2">Consensus Reached</div>
                           <div className="text-base lg:text-lg text-green-400 mb-4 lg:mb-6">
                             {consensusResult.overall_confidence}% Overall Confidence
                           </div>

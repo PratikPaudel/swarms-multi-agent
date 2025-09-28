@@ -234,18 +234,18 @@ class AutonomousTradingFloor:
             max_loops=1
         )
 
-        # Democratic Voting System - All agents vote on trading decisions
+        # Consensus Voting System - All agents vote on trading decisions
         all_agents = list(self.agents.values())
         self.voting_system = MajorityVoting(
             agents=all_agents,
-            name="Trading-Decision-Democracy",
-            description="Democratic voting system for trading decisions",
+            name="Trading-Decision-Consensus",
+            description="Consensus-based voting system for trading decisions",
             consensus_agent_model_name="claude-3-haiku-20240307",
             consensus_agent_prompt="""You are the Trading Decision Consensus Agent. Your role is to synthesize agent votes into final trading recommendations.
 
 **Instructions:**
 1. **Vote Analysis:** Each agent will provide a BUY/SELL/HOLD recommendation with reasoning
-2. **Democratic Process:** Count votes for each action (BUY/SELL/HOLD)
+2. **Consensus Process:** Count votes for each action (BUY/SELL/HOLD)
 3. **Consensus Building:** Determine the majority decision or synthesize if tied
 4. **Confidence Scoring:** Rate confidence (0-100) based on vote distribution and reasoning quality
 5. **Risk Assessment:** Evaluate overall risk level (Low/Medium/High)
@@ -302,7 +302,7 @@ Prioritize capital preservation and only recommend BUY/SELL with high confidence
                 self.strategy_workflow, strategy_task
             )
 
-            # Phase 4: Democratic Voting on Trading Decision
+            # Phase 4: Consensus Voting on Trading Decision
             voting_task = f"""Based on the following analysis, each agent must vote BUY, SELL, or HOLD for the major cryptocurrencies (BTC, ETH, SOL).
 
 Market Data: {json.dumps(self.last_market_data)}
@@ -315,7 +315,7 @@ VOTE: BUY/SELL/HOLD
 REASONING: [Your reasoning in 1-2 sentences]
 CONFIDENCE: [0-100]"""
 
-            # Run democratic voting
+            # Run consensus voting
             final_decision = await self._run_democratic_vote(voting_task)
 
             return final_decision
@@ -404,9 +404,9 @@ CONFIDENCE: [0-100]"""
             return f"Error: {str(e)}"
 
     async def _run_democratic_vote(self, voting_task: str) -> Dict[str, Any]:
-        """Run democratic voting process across all agents"""
+        """Run consensus voting process across all agents"""
         try:
-            logger.info("🗳️ Starting democratic voting process...")
+            logger.info("🗳️ Starting consensus voting process...")
 
             # Run the voting system
             loop = asyncio.get_event_loop()
@@ -420,7 +420,7 @@ CONFIDENCE: [0-100]"""
             return await self._parse_voting_results(voting_results)
 
         except Exception as e:
-            logger.error(f"Democratic voting error: {e}")
+            logger.error(f"Consensus voting error: {e}")
             return {
                 "decisions": [],
                 "consensus_action": "HOLD",
@@ -431,37 +431,95 @@ CONFIDENCE: [0-100]"""
             }
 
     async def _parse_voting_results(self, voting_results) -> Dict[str, Any]:
-        """Parse democratic voting results into our decision format"""
+        """Parse consensus voting results into our decision format.
+
+        Robust parsing strategy:
+        1) Prefer structured JSON from the consensus agent if present
+        2) Otherwise, count explicit tokens like "VOTE: BUY/SELL/HOLD" in text
+        3) Fallback to conservative keyword heuristics (avoids false BUY on instructions)
+        """
         try:
             logger.info("📊 Parsing voting results...")
 
-            # Convert voting results to string if it's a list
-            if isinstance(voting_results, list):
-                voting_text = " ".join(str(item) for item in voting_results)
+            # Preserve raw input for token parsing and also a flat string for logging
+            raw_results = voting_results
+            if isinstance(raw_results, list):
+                voting_text = " \n".join(str(item) for item in raw_results)
             else:
-                voting_text = str(voting_results)
+                voting_text = str(raw_results)
 
             logger.info(f"Voting results: {voting_text[:200]}...")
 
-            # Extract consensus action and reasoning from voting results
-            consensus_action = "HOLD"  # Default fallback
+            # Defaults
+            consensus_action = "HOLD"
             confidence = 70
-            reasoning = "Democratic vote completed"
+            reasoning = "Consensus vote completed"
             vote_breakdown = {"BUY": 0, "SELL": 0, "HOLD": 0}
+            agent_votes: Dict[str, str] = {}
 
-            # Try to parse the consensus agent's response
-            if "BUY" in voting_text.upper():
-                consensus_action = "BUY"
-            elif "SELL" in voting_text.upper():
-                consensus_action = "SELL"
-            else:
-                consensus_action = "HOLD"
+            # Step 1: Try structured JSON first
+            parsed_obj: Optional[Dict[str, Any]] = None
+            try:
+                parsed_obj = json.loads(voting_text) if isinstance(voting_text, str) else None
+            except Exception:
+                parsed_obj = None
 
-            # Look for confidence indicators
-            import re
-            confidence_match = re.search(r'confidence[:\s]*(\d+)', voting_text, re.IGNORECASE)
-            if confidence_match:
-                confidence = int(confidence_match.group(1))
+            if isinstance(parsed_obj, dict):
+                # Pull values when available
+                consensus_action = (parsed_obj.get("consensus_action")
+                                    or parsed_obj.get("decision")
+                                    or consensus_action)
+                vb = parsed_obj.get("vote_breakdown") or {}
+                for k in ("BUY", "SELL", "HOLD"):
+                    if isinstance(vb, dict) and k in vb and isinstance(vb[k], int):
+                        vote_breakdown[k] = vb[k]
+                confidence = int(parsed_obj.get("confidence")
+                                  or parsed_obj.get("overall_confidence")
+                                  or confidence)
+                reasoning = str(parsed_obj.get("reasoning") or reasoning)
+                if isinstance(parsed_obj.get("agent_votes"), dict):
+                    # Normalize keys to known agent ids when possible
+                    agent_votes = {str(k): str(v).upper() for k, v in parsed_obj["agent_votes"].items()}
+
+            # Step 2: If still ambiguous, count explicit VOTE: tokens in raw text
+            if sum(vote_breakdown.values()) == 0:
+                import re
+                # Prefer scanning the raw list items if provided
+                text_for_scan = voting_text
+                matches = re.findall(r"VOTE\s*:\s*(BUY|SELL|HOLD)", text_for_scan, flags=re.IGNORECASE)
+                votes_sequence = [m.upper() for m in matches]
+                for v in votes_sequence:
+                    if v in vote_breakdown:
+                        vote_breakdown[v] += 1
+
+                total_votes = sum(vote_breakdown.values())
+                if total_votes > 0:
+                    # Majority decision
+                    consensus_action = max(vote_breakdown.items(), key=lambda kv: kv[1])[0]
+                    confidence = int(round((vote_breakdown[consensus_action] / total_votes) * 100))
+
+                    # Attempt to map per-agent votes if the count matches
+                    agent_ids = list(self.agents.keys())
+                    if len(votes_sequence) == len(agent_ids):
+                        agent_votes = {agent_ids[i]: votes_sequence[i] for i in range(len(agent_ids))}
+
+            # Step 3: Final conservative heuristic if nothing detected by tokens
+            if sum(vote_breakdown.values()) == 0:
+                # Avoid counting occurrences in instructions by matching standalone words
+                import re
+                buy_hits = len(re.findall(r"\bBUY\b", voting_text, flags=re.IGNORECASE))
+                sell_hits = len(re.findall(r"\bSELL\b", voting_text, flags=re.IGNORECASE))
+                hold_hits = len(re.findall(r"\bHOLD\b", voting_text, flags=re.IGNORECASE))
+                vote_breakdown = {"BUY": buy_hits, "SELL": sell_hits, "HOLD": hold_hits}
+                # Choose majority but bias toward HOLD on ties
+                if hold_hits >= max(buy_hits, sell_hits):
+                    consensus_action = "HOLD"
+                elif buy_hits > sell_hits:
+                    consensus_action = "BUY"
+                else:
+                    consensus_action = "SELL"
+                total = max(1, buy_hits + sell_hits + hold_hits)
+                confidence = int(round((max(vote_breakdown.values()) / total) * 100))
 
             # Create trading decisions for each asset
             decisions = []
@@ -470,7 +528,7 @@ CONFIDENCE: [0-100]"""
                     "asset": asset,
                     "action": consensus_action,
                     "confidence": min(confidence, 95),
-                    "reasoning": f"Democratic vote: {reasoning[:100]}...",
+                    "reasoning": f"Consensus vote: {reasoning[:100]}...",
                     "price_target": self.last_market_data.get(asset, {}).get('price', 0) * (1.05 if consensus_action == "BUY" else 0.95 if consensus_action == "SELL" else 1.0),
                     "timestamp": datetime.utcnow().isoformat()
                 }
@@ -482,7 +540,7 @@ CONFIDENCE: [0-100]"""
                     "asset": asset,
                     "action": consensus_action,
                     "confidence": min(confidence, 95),
-                    "reasoning": f"Democratic consensus: {consensus_action} with {confidence}% confidence"
+                    "reasoning": f"Consensus: {consensus_action} with {confidence}% confidence"
                 }
                 self.recent_decisions.append(formatted_decision)
 
@@ -495,12 +553,12 @@ CONFIDENCE: [0-100]"""
                 "consensus_action": consensus_action,
                 "overall_confidence": confidence,
                 "risk_assessment": "Medium",
+                # Keep democracy_summary for backward compatibility, add consensus_summary
                 "democracy_summary": voting_text[:300] + "..." if len(voting_text) > 300 else voting_text,
+                "consensus_summary": voting_text[:300] + "..." if len(voting_text) > 300 else voting_text,
                 "vote_breakdown": vote_breakdown,
                 "timestamp": datetime.utcnow().isoformat(),
-                "agent_votes": {
-                    agent_id: consensus_action for agent_id in self.agents.keys()
-                },
+                "agent_votes": agent_votes or {agent_id: consensus_action for agent_id in self.agents.keys()},
                 "market_data": self.last_market_data
             }
 

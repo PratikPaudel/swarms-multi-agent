@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { Line, LineChart, ResponsiveContainer } from "recharts";
 
 interface ModernCoinDetailsCardProps {
   symbol: string;
@@ -57,11 +57,10 @@ export function ModernCoinDetailsCard({
           </div>
           <Badge
             variant="outline"
-            className={`border-0 text-xs font-medium px-2 py-1 ${
-              isPositive
+            className={`border-0 text-xs font-medium px-2 py-1 ${isPositive
                 ? 'bg-green-500/10 text-green-400'
                 : 'bg-red-500/10 text-red-400'
-            }`}
+              }`}
           >
             {isPositive ? (
               <TrendingUp className="w-3 h-3 mr-1" />
@@ -77,9 +76,8 @@ export function ModernCoinDetailsCard({
           <div className="text-white text-2xl font-bold font-mono leading-tight">
             ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div className={`text-sm font-medium ${
-            isPositive ? 'text-green-400' : 'text-red-400'
-          }`}>
+          <div className={`text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'
+            }`}>
             {isPositive ? '+' : ''}${(price * change24h / 100).toFixed(2)} today
           </div>
         </div>
@@ -129,16 +127,16 @@ export function ModernCoinDetailsCard({
               <div className="text-[#a0a0a0] text-xs">Rank</div>
               <div className="text-white font-semibold text-sm">
                 #{symbol === 'BTC' ? '1' :
-                   symbol === 'ETH' ? '2' :
-                   symbol === 'SOL' ? '5' : '4'}
+                  symbol === 'ETH' ? '2' :
+                    symbol === 'SOL' ? '5' : '4'}
               </div>
             </div>
             <div className="text-center">
               <div className="text-[#a0a0a0] text-xs">Dominance</div>
               <div className="text-white font-semibold text-sm">
                 {symbol === 'BTC' ? '55.2%' :
-                 symbol === 'ETH' ? '18.1%' :
-                 symbol === 'SOL' ? '2.1%' : '1.8%'}
+                  symbol === 'ETH' ? '18.1%' :
+                    symbol === 'SOL' ? '2.1%' : '1.8%'}
               </div>
             </div>
           </div>

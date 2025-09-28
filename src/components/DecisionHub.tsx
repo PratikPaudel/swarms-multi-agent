@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentGrid } from "@/components/AgentGrid";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 interface Agent {
@@ -44,10 +44,9 @@ export function DecisionHub({ agents, decisions, votingResults }: DecisionHubPro
                 <span className="text-xs text-muted-foreground">{decision.timestamp}</span>
               </div>
               <div className="flex justify-between items-center mb-1">
-                <span className={`text-sm font-bold ${
-                  decision.action === 'BUY' ? 'text-green-500' :
+                <span className={`text-sm font-bold ${decision.action === 'BUY' ? 'text-green-500' :
                   decision.action === 'SELL' ? 'text-red-500' : 'text-yellow-500'
-                }`}>
+                  }`}>
                   {decision.action}
                 </span>
                 <span className="text-sm">{decision.confidence}%</span>
@@ -61,7 +60,7 @@ export function DecisionHub({ agents, decisions, votingResults }: DecisionHubPro
       {/* Top Right: Voting Results */}
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle>Democratic Voting</CardTitle>
+          <CardTitle>Consensus Voting</CardTitle>
         </CardHeader>
         <CardContent className="flex-1">
           {votingResults ? (
@@ -91,7 +90,7 @@ export function DecisionHub({ agents, decisions, votingResults }: DecisionHubPro
             </div>
           ) : (
             <div className="text-center text-muted-foreground p-8">
-              No voting results yet. Trigger democracy to see results.
+              No voting results yet. Trigger consensus to see results.
             </div>
           )}
         </CardContent>
