@@ -59,7 +59,13 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://swarms-multi-agent.vercel.app",
+        "https://swarms-multi-agent-git-main-pratikpaudels-projects.vercel.app",
+        "https://swarms-multi-agent-90lnpbfoj-pratikpaudels-projects.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

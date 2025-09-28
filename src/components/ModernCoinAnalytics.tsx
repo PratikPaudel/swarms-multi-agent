@@ -10,6 +10,9 @@ interface ModernCoinAnalyticsProps {
 }
 
 export function ModernCoinAnalytics({ }: ModernCoinAnalyticsProps) {
+  const API_BASE = (typeof window !== 'undefined' && window.location.hostname.includes('localhost'))
+    ? 'http://localhost:8000'
+    : 'https://swarms-multi-agent.onrender.com';
   const [marketData, setMarketData] = useState([
     {
       symbol: "BTC",
@@ -75,7 +78,7 @@ export function ModernCoinAnalytics({ }: ModernCoinAnalyticsProps) {
   // Fetch real market data from backend
   const fetchMarketData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/market/current');
+      const response = await fetch(`${API_BASE}/market/current`);
       if (response.ok) {
         const data = await response.json();
         if (data.prices) {

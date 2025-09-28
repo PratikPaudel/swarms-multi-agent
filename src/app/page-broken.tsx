@@ -24,6 +24,9 @@ interface TradingDecisionResponse {
 }
 
 export default function TradingFloor() {
+  const API_BASE = (typeof window !== 'undefined' && window.location.hostname.includes('localhost'))
+    ? 'http://localhost:8000'
+    : 'https://swarms-multi-agent.onrender.com';
   const [activeTab, setActiveTab] = useState("coin-analytics");
   // Real WebSocket connection status
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
@@ -42,7 +45,7 @@ export default function TradingFloor() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const response = await fetch('http://localhost:8000/health');
+        const response = await fetch(`${API_BASE}/health`);
         if (response.ok) {
           setConnectionStatus("Connected");
         } else {
@@ -75,7 +78,7 @@ export default function TradingFloor() {
   const fetchAgentData = async () => {
     try {
       console.log('Fetching agent data from backend...');
-      const response = await fetch('http://localhost:8000/agents/status');
+      const response = await fetch(`${API_BASE}/agents/status`);
       console.log('Response status:', response.status);
       if (response.ok) {
         const data = await response.json();
@@ -109,7 +112,7 @@ export default function TradingFloor() {
   const fetchTradingDecisions = async () => {
     try {
       console.log('Fetching trading decisions from backend...');
-      const response = await fetch('http://localhost:8000/trading/decisions');
+      const response = await fetch(`${API_BASE}/trading/decisions`);
       if (response.ok) {
         const data = await response.json();
         console.log('Received trading decisions:', data);
@@ -167,7 +170,7 @@ export default function TradingFloor() {
   const handleTriggerAnalysis = async () => {
     try {
       // Fetch real current market prices
-      const response = await fetch('http://localhost:8000/market/current');
+      const response = await fetch(`${API_BASE}/market/current`);
       let currentMarketData;
 
       if (response.ok) {
@@ -216,7 +219,7 @@ export default function TradingFloor() {
       // Fetch real current market prices for voting
       let marketData;
       try {
-        const priceResponse = await fetch('http://localhost:8000/market/current');
+        const priceResponse = await fetch(`${API_BASE}/market/current`);
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           marketData = {
@@ -242,7 +245,7 @@ export default function TradingFloor() {
         };
       }
 
-      const response = await fetch('http://localhost:8000/trading/execute', {
+      const response = await fetch(`${API_BASE}/trading/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface WebSocketMessage {
   type: string;
@@ -159,6 +159,10 @@ export function useTradingFloorWebSocket() {
   const [tradingDecisions, setTradingDecisions] = useState<any[]>([]);
   const [marketUpdates, setMarketUpdates] = useState<any[]>([]);
 
+  const WS_BASE = (typeof window !== 'undefined' && window.location.hostname.includes('localhost'))
+    ? 'ws://localhost:8000/ws/trading-floor'
+    : 'wss://swarms-multi-agent.onrender.com/ws/trading-floor';
+
   const handleMessage = useCallback((message: WebSocketMessage) => {
     switch (message.type) {
       case 'connection_confirmed':
@@ -183,7 +187,7 @@ export function useTradingFloorWebSocket() {
   }, []);
 
   const { connectionStatus, sendMessage, reconnect } = useWebSocket({
-    url: 'ws://localhost:8000/ws/trading-floor',
+    url: WS_BASE,
     onMessage: handleMessage,
     onConnect: () => console.log('Trading Floor WebSocket connected'),
     onDisconnect: () => console.log('Trading Floor WebSocket disconnected'),

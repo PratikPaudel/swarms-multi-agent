@@ -26,6 +26,9 @@ interface TradingDecisionResponse {
 }
 
 export default function TradingFloor() {
+  const API_BASE = (typeof window !== 'undefined' && window.location.hostname.includes('localhost'))
+    ? 'http://localhost:8000'
+    : 'https://swarms-multi-agent.onrender.com';
   const [activeTab, setActiveTab] = useState("coin-analytics");
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
   const triggerMarketAnalysis = (data?: any) => console.log("Using REST API instead of WebSocket", data);
@@ -41,7 +44,7 @@ export default function TradingFloor() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const response = await fetch('http://localhost:8000/health');
+        const response = await fetch(`${API_BASE}/health`);
         if (response.ok) {
           setConnectionStatus("Connected");
         } else {
@@ -71,7 +74,7 @@ export default function TradingFloor() {
 
   const fetchAgentData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/agents/status');
+      const response = await fetch(`${API_BASE}/agents/status`);
       if (response.ok) {
         const data = await response.json();
         if (data.agents) {
@@ -100,7 +103,7 @@ export default function TradingFloor() {
 
   const fetchTradingDecisions = async () => {
     try {
-      const response = await fetch('http://localhost:8000/trading/decisions');
+      const response = await fetch(`${API_BASE}/trading/decisions`);
       if (response.ok) {
         const data = await response.json();
         if (data.decisions && data.decisions.length > 0) {
@@ -114,7 +117,7 @@ export default function TradingFloor() {
 
   const fetchAnalysisHistory = async () => {
     try {
-      const response = await fetch('http://localhost:8000/analysis/history?limit=10');
+      const response = await fetch(`${API_BASE}/analysis/history?limit=10`);
       if (response.ok) {
         const data = await response.json();
         if (data.analysis_results && data.analysis_results.length > 0) {
@@ -177,7 +180,7 @@ export default function TradingFloor() {
       // Get current market prices like we do for voting
       let marketData;
       try {
-        const priceResponse = await fetch('http://localhost:8000/market/current');
+        const priceResponse = await fetch(`${API_BASE}/market/current`);
         const priceData = await priceResponse.json();
 
         if (priceData.prices) {
@@ -202,7 +205,7 @@ export default function TradingFloor() {
         };
       }
 
-      const response = await fetch('http://localhost:8000/trading/analyze', {
+      const response = await fetch(`${API_BASE}/trading/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -232,7 +235,7 @@ export default function TradingFloor() {
     try {
       let marketData;
       try {
-        const priceResponse = await fetch('http://localhost:8000/market/current');
+        const priceResponse = await fetch(`${API_BASE}/market/current`);
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           marketData = {
@@ -256,7 +259,7 @@ export default function TradingFloor() {
         };
       }
 
-      const response = await fetch('http://localhost:8000/trading/execute', {
+      const response = await fetch(`${API_BASE}/trading/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
