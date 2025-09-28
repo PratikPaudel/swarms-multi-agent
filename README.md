@@ -55,6 +55,20 @@ The system's core is a **consensus-based voting mechanism (`MajorityVoting`)**, 
 *   **Complete System**: A fully integrated solution with a Next.js frontend, FastAPI backend, and a swarm of autonomous AI agents.
 *   **Transparent Reasoning**: The UI provides full visibility into the AI's decision-making process, including each agent's vote and confidence score.
 
+## 🧰 Tools & Services
+
+### Data Sources
+- **CoinGecko**: real-time crypto prices and basics
+- **Yahoo Finance**: historical OHLCV for charts and technicals
+- **Tavily API**: news retrieval/sentiment inputs
+- **Exa API**: web/social signals for sentiment/context
+- **DefiLlama**: DeFi metrics/TVL for on-chain context
+- **FRED API**: macroeconomic indicators
+
+### AI & Orchestration
+- **Claude 3 Haiku (Anthropic)**: model used by all agents and the consensus agent (`claude-3-haiku-20240307`)
+- **Swarms framework**: orchestrates agents and the `MajorityVoting` consensus workflow
+
 ---
 
 ## 🌐 Live Demo
