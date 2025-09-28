@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Brain, Activity, TrendingUp, TrendingDown, Target, Vote, Zap, CheckCircle, Clock, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Activity, Brain, CheckCircle, Clock, Target, Vote, Zap } from "lucide-react";
+import { useState } from "react";
 
 interface AgentThought {
   id: string;
@@ -23,9 +22,10 @@ interface DecisionTheaterProps {
   isOpen: boolean;
   onClose: () => void;
   onStartVoting: () => Promise<void>;
+  onConsensus?: (results: any) => void;
 }
 
-export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionTheaterProps) {
+export function DecisionTheater({ isOpen, onClose, onStartVoting, onConsensus }: DecisionTheaterProps) {
   const [currentPhase, setCurrentPhase] = useState<'init' | 'data-collection' | 'tier1' | 'tier2' | 'tier3' | 'consensus' | 'complete'>('init');
   const [agentThoughts, setAgentThoughts] = useState<AgentThought[]>([]);
   const [isVoting, setIsVoting] = useState(false);
@@ -139,6 +139,13 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
     };
 
     setConsensusResult(consensus);
+    if (onConsensus) {
+      try {
+        onConsensus(consensus);
+      } catch (_) {
+        // noop
+      }
+    }
     setCurrentPhase('complete');
     setIsVoting(false);
 
@@ -181,7 +188,10 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[98vw] w-full h-[95vh] bg-[#0a0a0a] border-[#2a2a2a] text-white flex flex-col">
+      <DialogContent
+        className="max-w-none sm:max-w-none md:max-w-none lg:max-w-none xl:max-w-none 2xl:max-w-none w-screen h-[92vh] overflow-hidden bg-[#0a0a0a] border-[#2a2a2a] text-white flex flex-col"
+        style={{ maxWidth: "min(98vw, 1600px)", width: "100vw", height: "92vh" }}
+      >
         <DialogHeader className="border-b border-[#2a2a2a] pb-6 flex-shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 lg:gap-4">
@@ -197,21 +207,13 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
               <Badge variant="outline" className="bg-[#1a1a1a] border-[#2a2a2a] text-white px-2 lg:px-4 py-1 lg:py-2 text-xs lg:text-sm">
                 Phase: {currentPhase.replace('-', ' ').toUpperCase()}
               </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClose}
-                className="bg-[#1a1a1a] border-[#2a2a2a] text-white hover:bg-[#2a2a2a] p-2 lg:p-3"
-              >
-                <X className="w-4 h-4 lg:w-5 lg:h-5" />
-              </Button>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-8 py-6 overflow-hidden">
-          {/* Left Panel - Process Flow */}
-          <div className="lg:col-span-3 space-y-6 lg:max-h-full lg:overflow-y-auto">
+        <div className="flex-1 min-h-0">
+          <div className="h-full overflow-y-auto p-6 space-y-6">
+            {/* Unified Container: Process + Stream */}
             <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-6">Democratic Process</h3>
@@ -238,71 +240,66 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
                 {currentPhase !== 'init' && (
                   <div className="space-y-3">
                     {/* Data Collection Phase */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      currentPhase === 'data-collection' ? 'bg-blue-500/20 border border-blue-500/30' :
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'data-collection' ? 'bg-blue-500/20 border border-blue-500/30' :
                       ['tier1', 'tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                    }`}>
+                      }`}>
                       {['tier1', 'tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ?
                         <CheckCircle className="w-5 h-5 text-green-400" /> :
                         currentPhase === 'data-collection' ?
-                        <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" /> :
-                        <Clock className="w-5 h-5 text-gray-500" />
+                          <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" /> :
+                          <Clock className="w-5 h-5 text-gray-500" />
                       }
                       <span>Data Collection</span>
                     </div>
 
                     {/* Tier 1 */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      currentPhase === 'tier1' ? 'bg-green-500/20 border border-green-500/30' :
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'tier1' ? 'bg-green-500/20 border border-green-500/30' :
                       ['tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                    }`}>
+                      }`}>
                       {['tier2', 'tier3', 'consensus', 'complete'].includes(currentPhase) ?
                         <CheckCircle className="w-5 h-5 text-green-400" /> :
                         currentPhase === 'tier1' ?
-                        <div className="animate-spin w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full" /> :
-                        <Clock className="w-5 h-5 text-gray-500" />
+                          <div className="animate-spin w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full" /> :
+                          <Clock className="w-5 h-5 text-gray-500" />
                       }
                       <span>Tier 1: Intelligence</span>
                     </div>
 
                     {/* Tier 2 */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      currentPhase === 'tier2' ? 'bg-blue-500/20 border border-blue-500/30' :
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'tier2' ? 'bg-blue-500/20 border border-blue-500/30' :
                       ['tier3', 'consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                    }`}>
+                      }`}>
                       {['tier3', 'consensus', 'complete'].includes(currentPhase) ?
                         <CheckCircle className="w-5 h-5 text-green-400" /> :
                         currentPhase === 'tier2' ?
-                        <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" /> :
-                        <Clock className="w-5 h-5 text-gray-500" />
+                          <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" /> :
+                          <Clock className="w-5 h-5 text-gray-500" />
                       }
                       <span>Tier 2: Analysis</span>
                     </div>
 
                     {/* Tier 3 */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      currentPhase === 'tier3' ? 'bg-purple-500/20 border border-purple-500/30' :
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'tier3' ? 'bg-purple-500/20 border border-purple-500/30' :
                       ['consensus', 'complete'].includes(currentPhase) ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                    }`}>
+                      }`}>
                       {['consensus', 'complete'].includes(currentPhase) ?
                         <CheckCircle className="w-5 h-5 text-green-400" /> :
                         currentPhase === 'tier3' ?
-                        <div className="animate-spin w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full" /> :
-                        <Clock className="w-5 h-5 text-gray-500" />
+                          <div className="animate-spin w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full" /> :
+                          <Clock className="w-5 h-5 text-gray-500" />
                       }
                       <span>Tier 3: Strategy</span>
                     </div>
 
                     {/* Consensus */}
-                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      currentPhase === 'consensus' ? 'bg-yellow-500/20 border border-yellow-500/30' :
+                    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${currentPhase === 'consensus' ? 'bg-yellow-500/20 border border-yellow-500/30' :
                       currentPhase === 'complete' ? 'bg-green-500/10' : 'bg-[#2a2a2a]'
-                    }`}>
+                      }`}>
                       {currentPhase === 'complete' ?
                         <CheckCircle className="w-5 h-5 text-green-400" /> :
                         currentPhase === 'consensus' ?
-                        <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" /> :
-                        <Clock className="w-5 h-5 text-gray-500" />
+                          <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" /> :
+                          <Clock className="w-5 h-5 text-gray-500" />
                       }
                       <span>Democratic Consensus</span>
                     </div>
@@ -321,45 +318,14 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
                     </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
 
-            {/* Market Data Display */}
-            {marketData && (
-              <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
-                <CardContent className="p-6">
-                  <h4 className="font-semibold text-lg mb-4">Market Data</h4>
-                  <div className="space-y-3">
-                    {Object.entries(marketData).map(([symbol, data]: [string, any]) => (
-                      <div key={symbol} className="flex justify-between items-center p-3 bg-[#0f0f0f] rounded-lg border border-[#2a2a2a]">
-                        <span className="font-medium text-white">{symbol}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="font-semibold text-white">${data.price.toLocaleString()}</span>
-                          <span className={`flex items-center gap-1 font-medium px-2 py-1 rounded ${
-                            data.change >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
-                          }`}>
-                            {data.change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                            {Math.abs(data.change)}%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                {/* Stream directly below, in same container */}
+                <div className="mt-8">
+                  <div className="pb-4 border-b border-[#2a2a2a]">
+                    <h3 className="text-xl font-bold">Live Agent Thinking Stream</h3>
+                    <p className="text-gray-400 text-sm mt-1">Real-time multi-agent consensus building</p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
 
-          {/* Right Panel - Agent Thoughts Stream */}
-          <div className="lg:col-span-9 flex-1 min-h-0">
-            <Card className="bg-[#1a1a1a] border-[#2a2a2a] h-full flex flex-col">
-              <CardContent className="p-0 h-full flex flex-col">
-                <div className="p-6 border-b border-[#2a2a2a] flex-shrink-0">
-                  <h3 className="text-xl font-bold">Live Agent Thinking Stream</h3>
-                  <p className="text-gray-400 text-sm mt-1">Real-time multi-agent consensus building</p>
-                </div>
-
-                <ScrollArea className="flex-1 p-6">
                   {agentThoughts.length === 0 && currentPhase === 'init' && (
                     <div className="text-center py-12 lg:py-20 text-[#a0a0a0]">
                       <Brain className="w-16 h-16 lg:w-20 lg:h-20 mx-auto mb-4 lg:mb-6 opacity-50" />
@@ -368,7 +334,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
                     </div>
                   )}
 
-                  <div className="space-y-6">
+                  <div className="space-y-6 pt-6">
                     {agentThoughts.map((thought, index) => {
                       const IconComponent = getTierIcon(thought.tier);
                       return (
@@ -393,12 +359,11 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
                               <div className="flex items-center gap-2 lg:gap-3 self-start sm:self-center">
                                 <Badge
                                   variant="outline"
-                                  className={`border-0 font-semibold px-2 lg:px-3 py-1 text-xs lg:text-sm ${
-                                    thought.vote === 'BUY' ? 'bg-green-500/20 text-green-400' :
+                                  className={`border-0 font-semibold px-2 lg:px-3 py-1 text-xs lg:text-sm ${thought.vote === 'BUY' ? 'bg-green-500/20 text-green-400' :
                                     thought.vote === 'SELL' ? 'bg-red-500/20 text-red-400' :
-                                    thought.vote === 'HOLD' ? 'bg-yellow-500/20 text-yellow-400' :
-                                    'bg-blue-500/20 text-blue-400'
-                                  }`}
+                                      thought.vote === 'HOLD' ? 'bg-yellow-500/20 text-yellow-400' :
+                                        'bg-blue-500/20 text-blue-400'
+                                    }`}
                                 >
                                   {thought.vote}
                                 </Badge>
@@ -439,7 +404,7 @@ export function DecisionTheater({ isOpen, onClose, onStartVoting }: DecisionThea
                       </div>
                     )}
                   </div>
-                </ScrollArea>
+                </div>
               </CardContent>
             </Card>
           </div>

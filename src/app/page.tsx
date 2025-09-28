@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SimpleSidebar } from "@/components/SimpleSidebar";
+import { DecisionTheater } from "@/components/DecisionTheater";
 import { ModernCoinAnalytics } from "@/components/ModernCoinAnalytics";
 import { ModernDecisionHub } from "@/components/ModernDecisionHub";
-import { DecisionTheater } from "@/components/DecisionTheater";
-import { Activity, Brain, TrendingUp, Shield, Target, Zap, RefreshCw, Vote } from "lucide-react";
+import { SimpleSidebar } from "@/components/SimpleSidebar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Activity, Brain, RefreshCw, Shield, Target, TrendingUp, Vote, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface TradingDecisionResponse {
   decisions?: any[];
@@ -275,11 +275,10 @@ export default function TradingFloor() {
             <div className="flex items-center gap-3">
               <Badge
                 variant="outline"
-                className={`border-0 font-medium ${
-                  connectionStatus === "Connected"
+                className={`border-0 font-medium ${connectionStatus === "Connected"
                     ? "bg-green-500/20 text-green-400"
                     : "bg-red-500/20 text-red-400"
-                } flex items-center gap-2`}
+                  } flex items-center gap-2`}
               >
                 <div className={`w-2 h-2 rounded-full ${connectionStatus === "Connected" ? "bg-green-400" : "bg-red-400"}`} />
                 {connectionStatus}
@@ -339,6 +338,23 @@ export default function TradingFloor() {
             return new Promise((resolve) => {
               handleDecisionTheaterVoting(resolve);
             });
+          }}
+          onConsensus={(results) => {
+            try {
+              setVotingResults(results);
+              if (results?.consensus_action) {
+                const newDecision = {
+                  timestamp: new Date().toLocaleString(),
+                  asset: 'BTC',
+                  action: results.consensus_action,
+                  confidence: Math.round(results.overall_confidence || 0),
+                  reasoning: results.democracy_summary || 'Democratic consensus reached'
+                };
+                setTradingDecisions(prev => [newDecision, ...prev.slice(0, 4)]);
+              }
+            } catch (e) {
+              // ignore
+            }
           }}
         />
       </div>
