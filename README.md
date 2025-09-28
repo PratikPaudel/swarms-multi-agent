@@ -46,6 +46,52 @@ The system's core is a **consensus-based voting mechanism (`MajorityVoting`)**, 
     *   **Portfolio Optimizer**: Manages allocation using Modern Portfolio Theory.
     *   **Trade Executor**: Simulates trade execution with optimal routing.
 
+### Agents: Types & Roles
+
+#### Tier 1 — Intelligence Gathering
+- **Market Data Agent**
+  - **Role**: Stream real-time prices/market stats
+  - **Inputs**: CoinGecko current prices; symbol list
+  - **Outputs**: Latest prices per asset, 24h change, volume snapshots
+- **Sentiment Agent**
+  - **Role**: News/social sentiment mining
+  - **Inputs**: Queries to Tavily (news), Exa (web/social)
+  - **Outputs**: Sentiment score, key headlines/themes, confidence
+- **On-Chain Agent**
+  - **Role**: DeFi/chain activity monitoring
+  - **Inputs**: DefiLlama TVL/flows
+  - **Outputs**: Protocol/chain signals, notable movements, risk flags
+
+#### Tier 2 — Analysis & Processing
+- **Technical Analyst**
+  - **Role**: Technical indicator computation and signal generation
+  - **Inputs**: Yahoo Finance historical OHLCV
+  - **Outputs**: RSI/MACD/Bollinger, trend/breakout notes, BUY/SELL/HOLD with confidence
+- **Risk Calculator**
+  - **Role**: Portfolio and trade risk assessment
+  - **Inputs**: Agent findings + recent prices
+  - **Outputs**: VaR/ES/Max Drawdown, position sizing guidance, risk level (Low/Medium/High)
+- **Correlation Analyzer**
+  - **Role**: Inter-market relationships and regime checks
+  - **Inputs**: Multi-asset returns/time-series
+  - **Outputs**: Correlation matrix, regime notes, pair-trade hints
+
+#### Tier 3 — Strategy & Execution
+- **Strategy Synthesizer**
+  - **Role**: Fuse T1/T2 signals into a coherent plan
+  - **Outputs**: Proposed action rationale and constraints
+- **Portfolio Optimizer**
+  - **Role**: Allocation and rebalancing per risk targets (MPT-style)
+  - **Outputs**: Weights/adjustments, rebalance suggestions
+- **Trade Executor**
+  - **Role**: Simulated execution planning and routing checks
+  - **Outputs**: Execution notes, slippage/latency considerations
+
+#### Consensus Agent (MajorityVoting)
+- **Role**: Aggregate individual agent votes into a final decision
+- **Model**: Claude 3 Haiku (`claude-3-haiku-20240307`)
+- **Outputs**: `consensus_action` (BUY/SELL/HOLD), `overall_confidence`, `agent_votes`, `vote_breakdown`, `consensus_summary`
+
 ---
 
 ## 🌟 Key Features & Innovations
