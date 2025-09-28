@@ -17,7 +17,7 @@ The Autonomous Trading Floor is a revolutionary system that leverages a swarm of
 
 ---
 
-## 核心价值：The Problem We Solve
+## The Problem We Solve
 
 In a market that never sleeps, coordination delays and emotional decisions on a human trading floor can lead to millions in losses. Traders are overwhelmed with data from countless sources.
 
